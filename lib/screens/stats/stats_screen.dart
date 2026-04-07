@@ -100,14 +100,24 @@ class _StatsScreenState extends State<StatsScreen> {
           decoration: BoxDecoration(
             color: isSelected ? AppColors.bgCard : Colors.transparent,
             borderRadius: BorderRadius.circular(AppDimensions.radiusSmall),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: AppColors.accent.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
           child: Text(
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 14,
-              fontWeight: isSelected ? FontWeight.w500 : null,
+              fontSize: 15,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               color: isSelected ? AppColors.accent : AppColors.textSecondary,
+              decoration: TextDecoration.none,
             ),
           ),
         ),
@@ -218,7 +228,7 @@ class _StatsScreenState extends State<StatsScreen> {
           return _buildEmptyChart();
         }
 
-        // 简化的柱状图
+        // 折线图
         return Container(
           padding: const EdgeInsets.all(AppDimensions.cardPadding),
           decoration: BoxDecoration(
@@ -236,38 +246,28 @@ class _StatsScreenState extends State<StatsScreen> {
               const SizedBox(height: 20),
               SizedBox(
                 height: 180,
-                child: BarChart(
-                  BarChartData(
-                    alignment: BarChartAlignment.spaceAround,
-                    maxY: _calculateMaxY(provider),
-                    barTouchData: BarTouchData(
-                      enabled: true,
-                      touchTooltipData: BarTouchTooltipData(
-                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                          final startDay = _getStartDay(provider);
-                          final day = startDay + groupIndex;
-                          return BarTooltipItem(
-                            '$day 日\n¥${rod.toY.toStringAsFixed(2)}',
-                            const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          );
-                        },
-                      ),
+                child: LineChart(
+                  LineChartData(
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: false,
+                      horizontalInterval: _calculateMaxY(provider) / 4,
+                      getDrawingHorizontalLine: (value) {
+                        return FlLine(color: AppColors.bgHover, strokeWidth: 1);
+                      },
                     ),
                     titlesData: FlTitlesData(
                       show: true,
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
+                          interval: _getLabelInterval(provider),
                           getTitlesWidget: (value, meta) {
-                            final startDay = _getStartDay(provider);
-                            final day = startDay + value.toInt();
+                            final day = value.toInt() + 1;
                             return Text(
                               '$day',
                               style: const TextStyle(
-                                fontSize: 11,
+                                fontSize: 10,
                                 color: AppColors.textSecondary,
                               ),
                             );
@@ -284,9 +284,29 @@ class _StatsScreenState extends State<StatsScreen> {
                         sideTitles: SideTitles(showTitles: false),
                       ),
                     ),
-                    gridData: const FlGridData(show: false),
                     borderData: FlBorderData(show: false),
-                    barGroups: _generateBarGroups(provider),
+                    minX: 0,
+                    maxX: _getMaxX(provider).toDouble(),
+                    minY: 0,
+                    maxY: _calculateMaxY(provider),
+                    lineBarsData: _generateLineBars(provider),
+                    lineTouchData: LineTouchData(
+                      enabled: true,
+                      touchTooltipData: LineTouchTooltipData(
+                        getTooltipItems: (touchedSpots) {
+                          return touchedSpots.map((spot) {
+                            final day = spot.x.toInt() + 1;
+                            return LineTooltipItem(
+                              '$day 日\n¥${spot.y.toStringAsFixed(2)}',
+                              const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            );
+                          }).toList();
+                        },
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -295,48 +315,6 @@ class _StatsScreenState extends State<StatsScreen> {
         );
       },
     );
-  }
-
-  List<BarChartGroupData> _generateBarGroups(RecordProvider provider) {
-    // 获取当月天数
-    final daysInMonth = DateTime(
-      provider.selectedMonth.year,
-      provider.selectedMonth.month + 1,
-      0,
-    ).day;
-
-    // 按日期分组统计支出
-    final dailyTotals = <int, double>{};
-    for (var i = 1; i <= daysInMonth; i++) {
-      dailyTotals[i] = 0.0;
-    }
-
-    for (var record in provider.records) {
-      if (record.type == RecordType.expense) {
-        final day = record.dateTime.day;
-        dailyTotals[day] = (dailyTotals[day] ?? 0) + record.amount;
-      }
-    }
-
-    // 生成柱状图数据（显示最近 7 天）
-    final startDay = _getStartDay(provider);
-    final daysToShow = daysInMonth > 7 ? 7 : daysInMonth;
-    return List.generate(daysToShow, (index) {
-      final day = startDay + index;
-      final amount = dailyTotals[day] ?? 0.0;
-
-      return BarChartGroupData(
-        x: index,
-        barRods: [
-          BarChartRodData(
-            toY: amount,
-            gradient: AppColors.accentGradient,
-            width: 20,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
-          ),
-        ],
-      );
-    });
   }
 
   double _calculateMaxY(RecordProvider provider) {
@@ -377,6 +355,75 @@ class _StatsScreenState extends State<StatsScreen> {
       0,
     ).day;
     return daysInMonth > 7 ? daysInMonth - 6 : 1;
+  }
+
+  int _getMaxX(RecordProvider provider) {
+    final daysInMonth = DateTime(
+      provider.selectedMonth.year,
+      provider.selectedMonth.month + 1,
+      0,
+    ).day;
+    return daysInMonth - 1;
+  }
+
+  double _getLabelInterval(RecordProvider provider) {
+    final daysInMonth = DateTime(
+      provider.selectedMonth.year,
+      provider.selectedMonth.month + 1,
+      0,
+    ).day;
+    if (daysInMonth <= 10) return 2;
+    if (daysInMonth <= 20) return 5;
+    return 10;
+  }
+
+  List<LineChartBarData> _generateLineBars(RecordProvider provider) {
+    final daysInMonth = DateTime(
+      provider.selectedMonth.year,
+      provider.selectedMonth.month + 1,
+      0,
+    ).day;
+
+    // 按日期分组统计支出
+    final dailyTotals = <int, double>{};
+    for (var i = 1; i <= daysInMonth; i++) {
+      dailyTotals[i] = 0.0;
+    }
+
+    for (var record in provider.records) {
+      if (record.type == RecordType.expense) {
+        final day = record.dateTime.day;
+        dailyTotals[day] = (dailyTotals[day] ?? 0) + record.amount;
+      }
+    }
+
+    // 生成折线图数据点
+    final spots = <FlSpot>[];
+    for (var day = 1; day <= daysInMonth; day++) {
+      spots.add(FlSpot((day - 1).toDouble(), dailyTotals[day] ?? 0.0));
+    }
+
+    return [
+      LineChartBarData(
+        spots: spots,
+        isCurved: true,
+        color: AppColors.accent,
+        barWidth: 3,
+        isStrokeCapRound: true,
+        dotData: FlDotData(show: false),
+        belowBarData: BarAreaData(
+          show: true,
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.accent.withOpacity(0.3),
+              AppColors.accent.withOpacity(0.05),
+            ],
+          ),
+        ),
+      ),
+    ];
   }
 
   Widget _buildEmptyChart() {
