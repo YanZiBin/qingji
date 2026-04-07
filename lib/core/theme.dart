@@ -35,31 +35,44 @@ class AppTheme {
         fontSize: 48,
         fontWeight: FontWeight.w300,
         color: AppColors.textPrimary,
+        decoration: TextDecoration.none,
       ),
       headlineMedium: TextStyle(
         fontSize: 22,
         fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
+        decoration: TextDecoration.none,
       ),
       titleMedium: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
+        decoration: TextDecoration.none,
       ),
       bodyLarge: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w400,
         color: AppColors.textPrimary,
+        decoration: TextDecoration.none,
       ),
       bodyMedium: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w400,
         color: AppColors.textSecondary,
+        decoration: TextDecoration.none,
       ),
       bodySmall: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w400,
         color: AppColors.textTertiary,
+        decoration: TextDecoration.none,
+      ),
+    ),
+    buttonTheme: const ButtonThemeData(textTheme: ButtonTextTheme.normal),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.accent,
+        overlayColor: Colors.transparent,
       ),
     ),
     iconTheme: const IconThemeData(

@@ -111,7 +111,18 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           ),
           TextButton(
             onPressed: () => setState(() => _isEditing = !_isEditing),
-            child: Text(_isEditing ? AppStrings.done : AppStrings.edit),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.accent,
+              overlayColor: Colors.transparent,
+            ),
+            child: Text(
+              _isEditing ? AppStrings.done : AppStrings.edit,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                decoration: TextDecoration.none,
+              ),
+            ),
           ),
         ],
       ),

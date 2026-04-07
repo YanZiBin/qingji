@@ -134,17 +134,7 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
         );
 
         return GestureDetector(
-          onTap: () async {
-            // 跳转到分类管理页，返回后刷新分类列表
-            await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const CategoriesScreen()),
-            );
-            // 返回后重新加载分类
-            if (mounted) {
-              await provider.loadCategories();
-            }
-          },
+          onTap: () => _showCategoryPicker(context, provider),
           child: Container(
             padding: const EdgeInsets.symmetric(
               horizontal: AppDimensions.pagePadding,
@@ -167,7 +157,11 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
                       const SizedBox(width: 8),
                       Text(category.name),
                       const SizedBox(width: 4),
-                      const Icon(Icons.chevron_right, size: 18, color: AppColors.textSecondary),
+                      const Icon(
+                        Icons.chevron_right,
+                        size: 18,
+                        color: AppColors.textSecondary,
+                      ),
                     ],
                   ),
                 ),
@@ -176,6 +170,212 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
           ),
         );
       },
+    );
+  }
+
+  void _showCategoryPicker(BuildContext context, CategoryProvider provider) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.bgSecondary,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 顶部标题栏
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: AppColors.bgHover, width: 1),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Text(
+                    '选择分类',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  const Spacer(),
+                  // 管理按钮
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CategoriesScreen(),
+                        ),
+                      ).then((_) {
+                        provider.loadCategories();
+                      });
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.accent,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                    child: const Text('管理', style: TextStyle(fontSize: 14)),
+                  ),
+                ],
+              ),
+            ),
+            // 类型切换
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => provider.switchType(RecordType.expense),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: provider.selectedType == RecordType.expense
+                              ? AppColors.bgCard
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '支出',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: provider.selectedType == RecordType.expense
+                                ? AppColors.accent
+                                : AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => provider.switchType(RecordType.income),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: provider.selectedType == RecordType.income
+                              ? AppColors.bgCard
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '收入',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: provider.selectedType == RecordType.income
+                                ? AppColors.accent
+                                : AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // 分类网格
+            Consumer<CategoryProvider>(
+              builder: (context, provider, _) {
+                final categories = provider.categories;
+                if (categories.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.all(40),
+                    child: Column(
+                      children: [
+                        const Text('📝', style: TextStyle(fontSize: 48)),
+                        const SizedBox(height: 16),
+                        const Text(
+                          '暂无分类',
+                          style: TextStyle(color: AppColors.textSecondary),
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const CategoriesScreen(),
+                              ),
+                            );
+                          },
+                          child: const Text('去添加'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 0.85,
+                  ),
+                  itemCount: categories.length,
+                  itemBuilder: (context, index) {
+                    final category = categories[index];
+                    final isSelected = _selectedCategoryId == category.id;
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() => _selectedCategoryId = category.id);
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppColors.accent
+                              : AppColors.bgCard,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isSelected
+                                ? AppColors.accent
+                                : AppColors.bgHover,
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              category.icon,
+                              style: TextStyle(
+                                fontSize: 24,
+                                color: isSelected ? Colors.white : null,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              category.name,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isSelected
+                                    ? Colors.white
+                                    : AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
     );
   }
 
