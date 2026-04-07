@@ -164,53 +164,61 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
         final categories = allCategories.where((c) => c.type == _type).toList();
 
         if (categories.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('📝', style: TextStyle(fontSize: 48)),
-                const SizedBox(height: 12),
-                const Text(
-                  '暂无分类',
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: AppColors.textSecondary,
-                    decoration: TextDecoration.none,
-                  ),
+          return SingleChildScrollView(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height * 0.3,
                 ),
-                const SizedBox(height: 16),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const CategoriesScreen(),
-                      ),
-                    ).then((_) {
-                      provider.loadCategories();
-                    });
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.bgTertiary,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      '去管理',
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('📝', style: TextStyle(fontSize: 40)),
+                    const SizedBox(height: 8),
+                    const Text(
+                      '暂无分类',
                       style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.accent,
-                        fontWeight: FontWeight.w500,
+                        color: AppColors.textSecondary,
                         decoration: TextDecoration.none,
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 12),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CategoriesScreen(),
+                          ),
+                        ).then((_) {
+                          provider.loadCategories();
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.bgTertiary,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Text(
+                          '去管理',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppColors.accent,
+                            fontWeight: FontWeight.w500,
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           );
         }

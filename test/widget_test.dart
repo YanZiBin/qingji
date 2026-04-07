@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'package:qingji/main.dart';
 import 'package:qingji/providers/record_provider.dart';
@@ -10,8 +11,11 @@ import 'package:qingji/providers/category_provider.dart';
 import 'package:qingji/core/constants.dart';
 
 void main() {
-  // 注意：测试使用内存数据库，每次测试后会自动清理
-  // 不需要额外配置 databaseFactory
+  // 初始化测试数据库（使用 FFI 内存数据库）
+  setUpAll(() {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  });
 
   testWidgets('应用启动并显示首页', (WidgetTester tester) async {
     // 构建应用（使用 Provider 包裹）

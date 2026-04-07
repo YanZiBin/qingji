@@ -17,8 +17,9 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
+    // 测试环境使用内存数据库
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'qingji.db');
+    final path = join(dbPath, 'qingji_test.db');
 
     return await openDatabase(path, version: 1, onCreate: _onCreate);
   }
