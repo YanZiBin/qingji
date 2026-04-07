@@ -121,6 +121,29 @@ class _StatsScreenState extends State<StatsScreen> {
         final summary = provider.monthSummary;
         final expense = summary['expense'] ?? 0.0;
 
+        // 计算当月实际天数
+        final now = DateTime.now();
+        final selectedMonth = provider.selectedMonth;
+        final isCurrentMonth =
+            selectedMonth.year == now.year && selectedMonth.month == now.month;
+
+        // 如果是当月，使用今天的天数；否则使用当月总天数
+        final daysInMonth = DateTime(
+          selectedMonth.year,
+          selectedMonth.month + 1,
+          0,
+        ).day;
+        final daysToCount = isCurrentMonth ? now.day : daysInMonth;
+
+        // 计算实际记账天数（去重）
+        final uniqueDays = provider.records
+            .map(
+              (r) =>
+                  DateTime(r.dateTime.year, r.dateTime.month, r.dateTime.day),
+            )
+            .toSet()
+            .length;
+
         return Container(
           padding: const EdgeInsets.all(AppDimensions.cardPadding),
           decoration: BoxDecoration(
@@ -148,15 +171,10 @@ class _StatsScreenState extends State<StatsScreen> {
                   Expanded(
                     child: _buildSummaryItem(
                       '日均支出',
-                      CurrencyFormatter.format(expense / 30),
+                      CurrencyFormatter.format(expense / daysToCount),
                     ),
                   ),
-                  Expanded(
-                    child: _buildSummaryItem(
-                      '记账天数',
-                      '${provider.records.length}天',
-                    ),
-                  ),
+                  Expanded(child: _buildSummaryItem('记账天数', '$uniqueDays 天')),
                 ],
               ),
             ],
