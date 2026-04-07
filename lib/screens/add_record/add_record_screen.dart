@@ -164,12 +164,12 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
         final categories = allCategories.where((c) => c.type == _type).toList();
 
         if (categories.isEmpty) {
-          return Padding(
-            padding: const EdgeInsets.all(40),
+          return Center(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const Text('📝', style: TextStyle(fontSize: 48)),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 const Text(
                   '暂无分类',
                   style: TextStyle(
@@ -178,10 +178,9 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
                     decoration: TextDecoration.none,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
                 GestureDetector(
                   onTap: () {
-                    // 跳转到分类管理页
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -193,8 +192,8 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
+                      horizontal: 24,
+                      vertical: 12,
                     ),
                     decoration: BoxDecoration(
                       color: AppColors.bgTertiary,

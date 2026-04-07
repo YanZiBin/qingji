@@ -10,6 +10,9 @@ import 'package:qingji/providers/category_provider.dart';
 import 'package:qingji/core/constants.dart';
 
 void main() {
+  // 注意：测试使用内存数据库，每次测试后会自动清理
+  // 不需要额外配置 databaseFactory
+
   testWidgets('应用启动并显示首页', (WidgetTester tester) async {
     // 构建应用（使用 Provider 包裹）
     await tester.pumpWidget(
