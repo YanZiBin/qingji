@@ -7,9 +7,7 @@ import '../../providers/category_provider.dart';
 
 /// 分类管理页
 class CategoriesScreen extends StatefulWidget {
-  final bool showBackButton;
-
-  const CategoriesScreen({super.key, this.showBackButton = false});
+  const CategoriesScreen({super.key});
 
   @override
   State<CategoriesScreen> createState() => _CategoriesScreenState();
@@ -102,9 +100,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
   Widget _buildHeader() {
     return Container(
-      padding: EdgeInsets.fromLTRB(
+      padding: const EdgeInsets.fromLTRB(
         AppDimensions.pagePadding,
-        widget.showBackButton ? 16 : 40,
+        40,
         AppDimensions.pagePadding,
         AppDimensions.cardPadding,
       ),
@@ -115,16 +113,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          if (widget.showBackButton)
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: const Icon(Icons.close, size: 24),
-            )
-          else
-            const Text(
-              AppStrings.categoryManagement,
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
-            ),
+          const Text(
+            AppStrings.categoryManagement,
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+          ),
           GestureDetector(
             onTap: () => setState(() => _isEditing = !_isEditing),
             child: Text(

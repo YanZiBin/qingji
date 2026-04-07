@@ -23,6 +23,11 @@ class BottomNav extends StatelessWidget {
           activeIcon: Icon(Icons.bar_chart),
           label: AppStrings.stats,
         ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.category_outlined),
+          activeIcon: Icon(Icons.category),
+          label: AppStrings.categories,
+        ),
       ],
     );
   }

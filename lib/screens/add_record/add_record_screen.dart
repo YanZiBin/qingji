@@ -6,7 +6,6 @@ import '../../models/category.dart';
 import '../../providers/record_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../utils/date_formatter.dart';
-import '../categories/categories_screen.dart';
 
 /// 记账页
 class AddRecordScreen extends StatefulWidget {
@@ -140,17 +139,7 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
         );
 
         return GestureDetector(
-          onTap: () async {
-            // 直接跳转到分类管理页
-            await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const CategoriesScreen()),
-            );
-            // 返回后重新加载分类
-            if (mounted) {
-              await provider.loadCategories();
-            }
-          },
+          onTap: () => _showCategorySelector(context, provider),
           child: Container(
             padding: const EdgeInsets.symmetric(
               horizontal: AppDimensions.pagePadding,
@@ -186,6 +175,192 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
           ),
         );
       },
+    );
+  }
+
+  void _showCategorySelector(BuildContext context, CategoryProvider provider) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.bgSecondary,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 顶部标题
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: AppColors.bgHover, width: 1),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Text(
+                    '选择分类',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      provider.switchType(_type);
+                    },
+                    child: const Text(
+                      '管理',
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: AppColors.accent,
+                        fontWeight: FontWeight.w500,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // 类型提示
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              color: AppColors.bgTertiary,
+              child: Text(
+                _type == RecordType.expense ? '支出分类' : '收入分类',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+            ),
+            // 分类网格
+            Consumer<CategoryProvider>(
+              builder: (context, provider, _) {
+                final categories = provider.categories
+                    .where((c) => c.type == _type)
+                    .toList();
+
+                if (categories.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.all(60),
+                    child: Column(
+                      children: [
+                        const Text('📝', style: TextStyle(fontSize: 48)),
+                        const SizedBox(height: 16),
+                        const Text(
+                          '暂无分类',
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: AppColors.textSecondary,
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context);
+                            provider.switchType(_type);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.bgTertiary,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              '去管理',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: AppColors.accent,
+                                fontWeight: FontWeight.w500,
+                                decoration: TextDecoration.none,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(20),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.9,
+                  ),
+                  itemCount: categories.length,
+                  itemBuilder: (context, index) {
+                    final category = categories[index];
+                    final isSelected = _selectedCategoryId == category.id;
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() => _selectedCategoryId = category.id);
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppColors.accent
+                              : AppColors.bgCard,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: isSelected
+                                ? AppColors.accent
+                                : AppColors.bgHover,
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              category.icon,
+                              style: TextStyle(
+                                fontSize: 26,
+                                color: isSelected ? Colors.white : null,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              category.name,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isSelected
+                                    ? Colors.white
+                                    : AppColors.textSecondary,
+                                decoration: TextDecoration.none,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
     );
   }
 
