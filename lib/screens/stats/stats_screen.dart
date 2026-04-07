@@ -132,7 +132,6 @@ class _StatsScreenState extends State<StatsScreen> {
         final timeRangeData = _getTimeRangeData(provider);
         final expense = timeRangeData['expense'] ?? 0.0;
         final periodLabel = timeRangeData['label'] as String;
-        final periodCount = timeRangeData['count'] as int;
         final uniquePeriods = timeRangeData['uniquePeriods'] as int;
 
         return Container(
@@ -163,7 +162,7 @@ class _StatsScreenState extends State<StatsScreen> {
                     child: _buildSummaryItem(
                       _getAverageLabel(),
                       CurrencyFormatter.format(
-                        _getAverageValue(expense, periodCount),
+                        _getAverageValue(expense, uniquePeriods),
                       ),
                     ),
                   ),
@@ -201,6 +200,7 @@ class _StatsScreenState extends State<StatsScreen> {
         0,
         (sum, r) => r.type == RecordType.expense ? sum + r.amount : sum,
       );
+      // 统计有记账的天数（去重）
       final uniqueDays = weekRecords
           .map(
             (r) => DateTime(r.dateTime.year, r.dateTime.month, r.dateTime.day),
@@ -212,21 +212,13 @@ class _StatsScreenState extends State<StatsScreen> {
         'expense': expense,
         'label': '本周总支出',
         'count': 7,
-        'uniquePeriods': uniqueDays,
+        'uniquePeriods': uniqueDays > 0 ? uniqueDays : 1,
       };
     } else if (_timeIndex == 1) {
       // 月：计算本月数据
       final summary = provider.monthSummary;
       final expense = summary['expense'] ?? 0.0;
       final selectedMonth = provider.selectedMonth;
-      final isCurrentMonth =
-          selectedMonth.year == now.year && selectedMonth.month == now.month;
-      final daysInMonth = DateTime(
-        selectedMonth.year,
-        selectedMonth.month + 1,
-        0,
-      ).day;
-      final daysToCount = isCurrentMonth ? now.day : daysInMonth;
       final uniqueDays = records
           .map(
             (r) => DateTime(r.dateTime.year, r.dateTime.month, r.dateTime.day),
@@ -237,8 +229,8 @@ class _StatsScreenState extends State<StatsScreen> {
       return {
         'expense': expense,
         'label': '${DateFormatter.yearMonth(selectedMonth)}总支出',
-        'count': daysToCount,
-        'uniquePeriods': uniqueDays,
+        'count': 30,
+        'uniquePeriods': uniqueDays > 0 ? uniqueDays : 1,
       };
     } else {
       // 年：计算本年数据
@@ -250,6 +242,7 @@ class _StatsScreenState extends State<StatsScreen> {
         0,
         (sum, r) => r.type == RecordType.expense ? sum + r.amount : sum,
       );
+      // 统计有记账的月数（去重）
       final uniqueMonths = yearRecords
           .map((r) => DateTime(r.dateTime.year, r.dateTime.month))
           .toSet()
@@ -258,8 +251,8 @@ class _StatsScreenState extends State<StatsScreen> {
       return {
         'expense': expense,
         'label': '${now.year}年总支出',
-        'count': now.month,
-        'uniquePeriods': uniqueMonths,
+        'count': 12,
+        'uniquePeriods': uniqueMonths > 0 ? uniqueMonths : 1,
       };
     }
   }
