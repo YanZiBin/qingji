@@ -28,7 +28,7 @@ void main() {
         child: const MyApp(),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     // 验证首页标题
     expect(find.text('轻记'), findsOneWidget);
@@ -47,13 +47,13 @@ void main() {
         child: const MyApp(),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     // 点击 FAB 打开记账页
     final fabFinder = find.byType(FloatingActionButton);
     expect(fabFinder, findsOneWidget);
     await tester.tap(fabFinder);
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     // 验证记账页标题
     expect(find.text('记一笔'), findsOneWidget);
@@ -72,7 +72,7 @@ void main() {
         child: const MyApp(),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     // 验证首页元素
     expect(find.text('轻记'), findsOneWidget);
@@ -81,7 +81,7 @@ void main() {
     final statsTab = find.text(AppStrings.stats);
     expect(statsTab, findsOneWidget);
     await tester.tap(statsTab);
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     // 验证统计页标题
     expect(find.text('统计分析'), findsOneWidget);
