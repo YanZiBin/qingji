@@ -14,26 +14,26 @@ import '../../models/record.dart';
 /// 首页
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-  
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  
+
   final List<Widget> _screens = const [
     _HomeContent(),
     StatsScreen(),
     CategoriesScreen(),
   ];
-  
+
   @override
   void initState() {
     super.initState();
     _loadData();
   }
-  
+
   Future<void> _loadData() async {
     final recordProvider = context.read<RecordProvider>();
     final categoryProvider = context.read<CategoryProvider>();
@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
       await categoryProvider.loadCategories();
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,15 +68,13 @@ class _HomeScreenState extends State<HomeScreen> {
 /// 首页内容
 class _HomeContent extends StatelessWidget {
   const _HomeContent();
-  
+
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: [
         // 顶部头部
-        SliverToBoxAdapter(
-          child: _buildHeader(context),
-        ),
+        SliverToBoxAdapter(child: _buildHeader(context)),
         // 月度总结
         SliverToBoxAdapter(
           child: Padding(
@@ -95,15 +93,9 @@ class _HomeContent extends StatelessWidget {
               children: [
                 const Text(
                   '最近记录',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text('查看全部'),
-                ),
+                TextButton(onPressed: () {}, child: const Text('查看全部')),
               ],
             ),
           ),
@@ -113,7 +105,7 @@ class _HomeContent extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(
@@ -124,27 +116,19 @@ class _HomeContent extends StatelessWidget {
       ),
       decoration: const BoxDecoration(
         color: AppColors.bgSecondary,
-        border: Border(
-          bottom: BorderSide(color: AppColors.bgHover, width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: AppColors.bgHover, width: 1)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text(
             AppStrings.appName,
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
           ),
           GestureDetector(
             onTap: () => _showMonthPicker(context),
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: AppColors.bgTertiary,
                 borderRadius: BorderRadius.circular(AppDimensions.radiusSmall),
@@ -170,7 +154,7 @@ class _HomeContent extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildMonthSummary(BuildContext context) {
     return Consumer<RecordProvider>(
       builder: (context, provider, _) {
@@ -197,7 +181,7 @@ class _HomeContent extends StatelessWidget {
       },
     );
   }
-  
+
   Widget _buildSummaryCard({
     required String label,
     required double amount,
@@ -233,11 +217,11 @@ class _HomeContent extends StatelessWidget {
       ),
     );
   }
-  
+
   void _showMonthPicker(BuildContext context) {
     final recordProvider = context.read<RecordProvider>();
     final currentDate = recordProvider.selectedMonth;
-    
+
     showDatePicker(
       context: context,
       initialDate: currentDate,
@@ -255,7 +239,7 @@ class _HomeContent extends StatelessWidget {
 /// 记录列表
 class _RecordList extends StatelessWidget {
   const _RecordList();
-  
+
   @override
   Widget build(BuildContext context) {
     return Consumer<RecordProvider>(
@@ -265,13 +249,11 @@ class _RecordList extends StatelessWidget {
             child: Center(child: CircularProgressIndicator()),
           );
         }
-        
+
         if (provider.records.isEmpty) {
-          return const SliverToBoxAdapter(
-            child: _EmptyState(),
-          );
+          return const SliverToBoxAdapter(child: _EmptyState());
         }
-        
+
         // 按日期分组
         final groupedRecords = <String, List<Record>>{};
         for (var record in provider.records) {
@@ -279,24 +261,22 @@ class _RecordList extends StatelessWidget {
           groupedRecords.putIfAbsent(dateKey, () => []);
           groupedRecords[dateKey]!.add(record);
         }
-        
+
         return SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              final dates = groupedRecords.keys.toList();
-              if (index >= dates.length) return null;
-              
-              final date = dates[index];
-              final records = groupedRecords[date]!;
-              
-              return _buildDateGroup(date, records);
-            },
-          ),
+          delegate: SliverChildBuilderDelegate((context, index) {
+            final dates = groupedRecords.keys.toList();
+            if (index >= dates.length) return null;
+
+            final date = dates[index];
+            final records = groupedRecords[date]!;
+
+            return _buildDateGroup(date, records);
+          }),
         );
       },
     );
   }
-  
+
   Widget _buildDateGroup(String date, List<Record> records) {
     double dailyTotal = 0;
     for (var record in records) {
@@ -304,7 +284,7 @@ class _RecordList extends StatelessWidget {
         dailyTotal += record.amount;
       }
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -339,7 +319,7 @@ class _RecordList extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildRecordItem(Record record) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(
@@ -362,10 +342,7 @@ class _RecordList extends StatelessWidget {
       ),
       title: Text(
         record.categoryName ?? '未知',
-        style: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w500,
-        ),
+        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
       ),
       subtitle: record.note != null
           ? Text(
@@ -395,32 +372,23 @@ class _RecordList extends StatelessWidget {
 /// 空状态
 class _EmptyState extends StatelessWidget {
   const _EmptyState();
-  
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 60),
       child: Column(
         children: [
-          const Text(
-            '\u{1F4DD}',
-            style: TextStyle(fontSize: 64),
-          ),
+          const Text('\u{1F4DD}', style: TextStyle(fontSize: 64)),
           const SizedBox(height: 16),
           const Text(
             '还没有记录',
-            style: TextStyle(
-              fontSize: 16,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 8),
           const Text(
             '点击下方 + 开始记账吧',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textTertiary,
-            ),
+            style: TextStyle(fontSize: 14, color: AppColors.textTertiary),
           ),
         ],
       ),

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>轻记 APP 图标生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #2d3436;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #636e72;
+            margin-bottom: 40px;
+        }
+
+        .preview-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .icon-preview {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        .sizes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 30px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .size-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .size-label {
+            font-size: 14px;
+            color: #636e72;
+            font-weight: 500;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #FFD93D 0%, #FF9F43 100%);
+            color: #2d3436;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(255, 159, 67, 0.3);
+            transition: all 0.2s;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(255, 159, 67, 0.4);
+        }
+
+        .instructions {
+            max-width: 700px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .instructions h2 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: #FF9F43;
+        }
+
+        .instructions p, .instructions li {
+            font-size: 15px;
+            line-height: 1.8;
+            color: #636e72;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        code {
+            background: #f1f2f6;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 轻记 APP 可爱金币图标</h1>
+    <p class="subtitle">金黄色渐变 + 萌萌表情 + ¥ 符号 ✨</p>
+
+    <div class="preview-section">
+        <div class="icon-preview">
+            <canvas id="mainIcon" width="512" height="512"></canvas>
+        </div>
+    </div>
+
+    <h2 style="margin-bottom: 20px; color: #2d3436;">📱 各尺寸预览</h2>
+    <div class="sizes-grid">
+        <div class="size-item">
+            <canvas id="icon1024" width="120" height="120"></canvas>
+            <span class="size-label">1024×1024</span>
+        </div>
+        <div class="size-item">
+            <canvas id="icon512" width="80" height="80"></canvas>
+            <span class="size-label">512×512</span>
+        </div>
+        <div class="size-item">
+            <canvas id="icon192" width="60" height="60"></canvas>
+            <span class="size-label">192×192</span>
+        </div>
+        <div class="size-item">
+            <canvas id="icon144" width="50" height="50"></canvas>
+            <span class="size-label">144×144</span>
+        </div>
+        <div class="size-item">
+            <canvas id="icon96" width="40" height="40"></canvas>
+            <span class="size-label">96×96</span>
+        </div>
+        <div class="size-item">
+            <canvas id="icon72" width="30" height="30"></canvas>
+            <span class="size-label">72×72</span>
+        </div>
+        <div class="size-item">
+            <canvas id="icon48" width="25" height="25"></canvas>
+            <span class="size-label">48×48</span>
+        </div>
+    </div>
+
+    <div style="margin-top: 40px;">
+        <button class="download-btn" onclick="downloadAllIcons()">📦 下载所有尺寸图标</button>
+    </div>
+
+    <div class="instructions" style="margin-top: 40px;">
+        <h2>📋 替换图标步骤</h2>
+        <ol>
+            <li>点击上方"下载所有尺寸图标"按钮</li>
+            <li>解压下载的 ZIP 文件</li>
+            <li>将各尺寸的 PNG 文件复制到 Flutter 项目的 <code>android/app/src/main/res/mipmap-xxx/</code> 目录</li>
+            <li>运行 <code>flutter clean && flutter build apk --release</code> 重新打包</li>
+            <li>安装新 APK 到手机</li>
+        </ol>
+        <p style="margin-top: 16px;"><strong>目录对照表：</strong></p>
+        <ul style="margin-left: 20px;">
+            <li><code>mipmap-mdpi/</code> → 48×48</li>
+            <li><code>mipmap-hdpi/</code> → 72×72</li>
+            <li><code>mipmap-xhdpi/</code> → 96×96</li>
+            <li><code>mipmap-xxhdpi/</code> → 144×144</li>
+            <li><code>mipmap-xxxhdpi/</code> → 192×192</li>
+        </ul>
+    </div>
+
+    <script>
+        // 绘制可爱金币图标
+        function drawCuteCoinIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            const scale = size / 512;
+
+            // 背景渐变
+            const bgGradient = ctx.createLinearGradient(0, 0, size, size);
+            bgGradient.addColorStop(0, '#e0c3fc');
+            bgGradient.addColorStop(1, '#8ec5fc');
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, size, size);
+
+            // 金币主体
+            const coinGradient = ctx.createLinearGradient(
+                size * 0.2, size * 0.2,
+                size * 0.8, size * 0.8
+            );
+            coinGradient.addColorStop(0, '#FFD93D');
+            coinGradient.addColorStop(1, '#FF9F43');
+
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const coinRadius = size * 0.35;
+
+            // 阴影
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+            ctx.shadowBlur = size * 0.05;
+            ctx.shadowOffsetY = size * 0.02;
+
+            // 金币圆形
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, coinRadius, 0, Math.PI * 2);
+            ctx.fillStyle = coinGradient;
+            ctx.fill();
+
+            // 重置阴影
+            ctx.shadowColor = 'transparent';
+
+            // 金币内圈
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, coinRadius * 0.88, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = size * 0.015;
+            ctx.stroke();
+
+            // 高光
+            ctx.beginPath();
+            ctx.ellipse(
+                centerX - coinRadius * 0.25,
+                centerY - coinRadius * 0.4,
+                coinRadius * 0.4,
+                coinRadius * 0.2,
+                -Math.PI / 6,
+                0,
+                Math.PI * 2
+            );
+            const shineGradient = ctx.createLinearGradient(
+                centerX - coinRadius * 0.4,
+                centerY - coinRadius * 0.5,
+                centerX,
+                centerY - coinRadius * 0.2
+            );
+            shineGradient.addColorStop(0, 'rgba(255, 255, 255, 0.7)');
+            shineGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = shineGradient;
+            ctx.fill();
+
+            // 眼睛
+            const eyeY = centerY - coinRadius * 0.15;
+            const eyeSpacing = coinRadius * 0.35;
+            const eyeRadius = coinRadius * 0.1;
+
+            // 左眼
+            ctx.beginPath();
+            ctx.arc(centerX - eyeSpacing, eyeY, eyeRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#2d3436';
+            ctx.fill();
+
+            // 右眼
+            ctx.beginPath();
+            ctx.arc(centerX + eyeSpacing, eyeY, eyeRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#2d3436';
+            ctx.fill();
+
+            // 眼睛高光
+            const eyeHighlightRadius = eyeRadius * 0.35;
+            ctx.beginPath();
+            ctx.arc(
+                centerX - eyeSpacing + eyeRadius * 0.3,
+                eyeY - eyeRadius * 0.3,
+                eyeHighlightRadius,
+                0,
+                Math.PI * 2
+            );
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(
+                centerX + eyeSpacing + eyeRadius * 0.3,
+                eyeY - eyeRadius * 0.3,
+                eyeHighlightRadius,
+                0,
+                Math.PI * 2
+            );
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fill();
+
+            // 腮红
+            const blushY = centerY + coinRadius * 0.05;
+            const blushX = coinRadius * 0.55;
+            const blushWidth = coinRadius * 0.2;
+            const blushHeight = coinRadius * 0.12;
+
+            ctx.beginPath();
+            ctx.ellipse(centerX - blushX, blushY, blushWidth, blushHeight, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 184, 208, 0.8)';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.ellipse(centerX + blushX, blushY, blushWidth, blushHeight, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 184, 208, 0.8)';
+            ctx.fill();
+
+            // 微笑嘴巴
+            const mouthY = centerY + coinRadius * 0.2;
+            const mouthWidth = coinRadius * 0.3;
+            const mouthCurve = coinRadius * 0.15;
+
+            ctx.beginPath();
+            ctx.moveTo(centerX - mouthWidth, mouthY);
+            ctx.quadraticCurveTo(centerX, mouthY + mouthCurve, centerX + mouthWidth, mouthY);
+            ctx.strokeStyle = '#2d3436';
+            ctx.lineWidth = size * 0.015;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            // ¥ 符号
+            ctx.font = `bold ${coinRadius * 0.6}px Arial, sans-serif`;
+            ctx.fillStyle = '#FFFFFF';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('¥', centerX, centerY + coinRadius * 0.55);
+
+            // 装饰元素 - 加号
+            const plusSize = size * 0.06;
+            const plusY = size * 0.18;
+
+            // 左上角加号
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.lineWidth = size * 0.015;
+            ctx.lineCap = 'round';
+
+            ctx.beginPath();
+            ctx.moveTo(size * 0.15 - plusSize, plusY);
+            ctx.lineTo(size * 0.15 + plusSize, plusY);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(size * 0.15, plusY - plusSize);
+            ctx.lineTo(size * 0.15, plusY + plusSize);
+            ctx.stroke();
+
+            // 右上角加号
+            const plus2X = size * 0.82;
+            const plus2Y = size * 0.15;
+
+            ctx.beginPath();
+            ctx.moveTo(plus2X - plusSize * 0.8, plus2Y);
+            ctx.lineTo(plus2X + plusSize * 0.8, plus2Y);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(plus2X, plus2Y - plusSize * 0.8);
+            ctx.lineTo(plus2X, plus2Y + plusSize * 0.8);
+            ctx.stroke();
+
+            // 装饰圆点
+            ctx.beginPath();
+            ctx.arc(size * 0.12, size * 0.32, size * 0.02, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(size * 0.88, size * 0.28, size * 0.025, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.fill();
+
+            // 装饰短线
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.lineWidth = size * 0.012;
+
+            ctx.beginPath();
+            ctx.moveTo(size * 0.08, size * 0.22);
+            ctx.lineTo(size * 0.08 + size * 0.08, size * 0.22);
+            ctx.stroke();
+        }
+
+        // 绘制所有尺寸的图标
+        function drawAllIcons() {
+            const sizes = [512, 1024, 192, 144, 96, 72, 48];
+            const canvasIds = ['mainIcon', 'icon1024', 'icon192', 'icon144', 'icon96', 'icon72', 'icon48'];
+
+            sizes.forEach((size, index) => {
+                const canvas = document.getElementById(canvasIds[index]);
+                if (canvas) {
+                    drawCuteCoinIcon(canvas, size);
+                }
+            });
+        }
+
+        // 下载单个图标
+        function downloadIcon(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // 下载所有图标
+        async function downloadAllIcons() {
+            const sizes = [1024, 512, 192, 144, 96, 72, 48];
+            const canvasIds = ['icon1024', 'mainIcon', 'icon192', 'icon144', 'icon96', 'icon72', 'icon48'];
+
+            // 为每个尺寸创建更大的 canvas
+            for (let i = 0; i < sizes.length; i++) {
+                const size = sizes[i];
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = size;
+                tempCanvas.height = size;
+                
+                drawCuteCoinIcon(tempCanvas, size);
+                
+                downloadIcon(tempCanvas, `ic_launcher_${size}x${size}.png`);
+                
+                // 添加延迟避免浏览器阻止多次下载
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+        }
+
+        // 页面加载时绘制图标
+        window.addEventListener('load', drawAllIcons);
+    </script>
+</body>
+</html>

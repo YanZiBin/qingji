@@ -10,7 +10,7 @@ class Category {
   final bool isDefault;
   final int sortOrder;
   final Color? color;
-  
+
   Category({
     this.id,
     required this.name,
@@ -20,7 +20,7 @@ class Category {
     this.sortOrder = 0,
     this.color,
   });
-  
+
   /// 从数据库Map创建Category
   factory Category.fromMap(Map<String, dynamic> map) {
     return Category(
@@ -30,10 +30,12 @@ class Category {
       type: RecordType.fromDatabaseString(map['type'] as String),
       isDefault: map['is_default'] == 1,
       sortOrder: map['sort_order'] as int,
-      color: map['color'] != null ? Color(int.parse(map['color'] as String)) : null,
+      color: map['color'] != null
+          ? Color(int.parse(map['color'] as String))
+          : null,
     );
   }
-  
+
   /// 转换为数据库Map
   Map<String, dynamic> toMap() {
     return {
@@ -46,7 +48,7 @@ class Category {
       'color': color?.toARGB32().toRadixString(16),
     };
   }
-  
+
   /// 复制并修改
   Category copyWith({
     int? id,

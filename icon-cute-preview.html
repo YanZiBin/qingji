@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>轻记 APP 可爱金币图标</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #2d3436;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #636e72;
+            margin-bottom: 40px;
+        }
+
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 50px;
+            max-width: 1000px;
+            width: 100%;
+            margin-bottom: 60px;
+        }
+
+        .icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .icon-item svg {
+            border-radius: 22%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .size-label {
+            font-size: 16px;
+            color: #2d3436;
+            font-weight: 500;
+        }
+
+        .design-info {
+            max-width: 700px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .design-info h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #4ECDC4;
+        }
+
+        .design-info p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #636e72;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 轻记 APP 可爱金币图标</h1>
+    <p class="subtitle">萌萌哒金币风格，可爱又有质感 ✨</p>
+
+    <div class="icon-grid">
+        <!-- 方案 A：薄荷绿金币 -->
+        <div class="icon-item">
+            <svg width="220" height="220" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="bgA" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#a8edea;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#fed6e3;stop-opacity:1" />
+                    </linearGradient>
+                    <linearGradient id="coinA" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#4ECDC4;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#44A8B3;stop-opacity:1" />
+                    </linearGradient>
+                    <linearGradient id="shineA" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.6" />
+                        <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:0" />
+                    </linearGradient>
+                </defs>
+                <!-- 背景 -->
+                <rect width="512" height="512" fill="url(#bgA)"/>
+                <!-- 金币主体 -->
+                <circle cx="256" cy="256" r="180" fill="url(#coinA)"/>
+                <!-- 金币内圈 -->
+                <circle cx="256" cy="256" r="160" fill="none" stroke="#FFFFFF" stroke-width="8" opacity="0.3"/>
+                <!-- 高光 -->
+                <ellipse cx="200" cy="160" rx="80" ry="40" fill="url(#shineA)" transform="rotate(-30 200 160)"/>
+                <!-- 眼睛 -->
+                <circle cx="196" cy="220" r="18" fill="#2d3436"/>
+                <circle cx="316" cy="220" r="18" fill="#2d3436"/>
+                <!-- 眼睛高光 -->
+                <circle cx="202" cy="214" r="6" fill="#FFFFFF"/>
+                <circle cx="322" cy="214" r="6" fill="#FFFFFF"/>
+                <!-- 腮红 -->
+                <ellipse cx="168" cy="256" rx="24" ry="16" fill="#FFB8D0" opacity="0.8"/>
+                <ellipse cx="344" cy="256" rx="24" ry="16" fill="#FFB8D0" opacity="0.8"/>
+                <!-- 微笑嘴巴 -->
+                <path d="M 226 260 Q 256 290 286 260" stroke="#2d3436" stroke-width="8" fill="none" stroke-linecap="round"/>
+                <!-- ¥ 符号 -->
+                <text x="256" y="356" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="#FFFFFF" text-anchor="middle">¥</text>
+                <!-- 装饰元素 -->
+                <rect x="80" y="100" width="40" height="12" rx="6" fill="#FFFFFF" opacity="0.6"/>
+                <circle cx="120" cy="160" r="10" fill="#FFFFFF" opacity="0.5"/>
+                <path d="M 390 80 L 410 80 M 400 70 L 400 90" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" opacity="0.7"/>
+                <path d="M 430 140 L 450 140 M 440 130 L 440 150" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
+                <circle cx="440" cy="100" r="12" fill="#FFFFFF" opacity="0.6"/>
+            </svg>
+            <span class="size-label">方案 A：薄荷绿金币 ⭐ 推荐</span>
+        </div>
+
+        <!-- 方案 B：金黄色金币 -->
+        <div class="icon-item">
+            <svg width="220" height="220" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="bgB" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#e0c3fc;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#8ec5fc;stop-opacity:1" />
+                    </linearGradient>
+                    <linearGradient id="coinB" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#FFD93D;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#FF9F43;stop-opacity:1" />
+                    </linearGradient>
+                    <linearGradient id="shineB" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.7" />
+                        <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:0" />
+                    </linearGradient>
+                </defs>
+                <!-- 背景 -->
+                <rect width="512" height="512" fill="url(#bgB)"/>
+                <!-- 金币主体 -->
+                <circle cx="256" cy="256" r="180" fill="url(#coinB)"/>
+                <!-- 金币内圈 -->
+                <circle cx="256" cy="256" r="160" fill="none" stroke="#FFFFFF" stroke-width="8" opacity="0.4"/>
+                <!-- 高光 -->
+                <ellipse cx="200" cy="160" rx="80" ry="40" fill="url(#shineB)" transform="rotate(-30 200 160)"/>
+                <!-- 眼睛 -->
+                <circle cx="196" cy="220" r="18" fill="#2d3436"/>
+                <circle cx="316" cy="220" r="18" fill="#2d3436"/>
+                <!-- 眼睛高光 -->
+                <circle cx="202" cy="214" r="6" fill="#FFFFFF"/>
+                <circle cx="322" cy="214" r="6" fill="#FFFFFF"/>
+                <!-- 腮红 -->
+                <ellipse cx="168" cy="256" rx="24" ry="16" fill="#FFB8D0" opacity="0.8"/>
+                <ellipse cx="344" cy="256" rx="24" ry="16" fill="#FFB8D0" opacity="0.8"/>
+                <!-- 微笑嘴巴 -->
+                <path d="M 226 260 Q 256 290 286 260" stroke="#2d3436" stroke-width="8" fill="none" stroke-linecap="round"/>
+                <!-- ¥ 符号 -->
+                <text x="256" y="356" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="#FFFFFF" text-anchor="middle">¥</text>
+                <!-- 装饰元素 -->
+                <rect x="80" y="100" width="40" height="12" rx="6" fill="#FFFFFF" opacity="0.6"/>
+                <circle cx="120" cy="160" r="10" fill="#FFFFFF" opacity="0.5"/>
+                <path d="M 390 80 L 410 80 M 400 70 L 400 90" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" opacity="0.7"/>
+                <path d="M 430 140 L 450 140 M 440 130 L 440 150" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
+                <circle cx="440" cy="100" r="12" fill="#FFFFFF" opacity="0.6"/>
+            </svg>
+            <span class="size-label">方案 B：金黄色金币</span>
+        </div>
+
+        <!-- 方案 C：粉色金币 -->
+        <div class="icon-item">
+            <svg width="220" height="220" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="bgC" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#ffecd2;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#fcb69f;stop-opacity:1" />
+                    </linearGradient>
+                    <linearGradient id="coinC" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#FF6B81;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#FF8E9E;stop-opacity:1" />
+                    </linearGradient>
+                    <linearGradient id="shineC" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.6" />
+                        <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:0" />
+                    </linearGradient>
+                </defs>
+                <!-- 背景 -->
+                <rect width="512" height="512" fill="url(#bgC)"/>
+                <!-- 金币主体 -->
+                <circle cx="256" cy="256" r="180" fill="url(#coinC)"/>
+                <!-- 金币内圈 -->
+                <circle cx="256" cy="256" r="160" fill="none" stroke="#FFFFFF" stroke-width="8" opacity="0.3"/>
+                <!-- 高光 -->
+                <ellipse cx="200" cy="160" rx="80" ry="40" fill="url(#shineC)" transform="rotate(-30 200 160)"/>
+                <!-- 眼睛 -->
+                <circle cx="196" cy="220" r="18" fill="#2d3436"/>
+                <circle cx="316" cy="220" r="18" fill="#2d3436"/>
+                <!-- 眼睛高光 -->
+                <circle cx="202" cy="214" r="6" fill="#FFFFFF"/>
+                <circle cx="322" cy="214" r="6" fill="#FFFFFF"/>
+                <!-- 腮红 -->
+                <ellipse cx="168" cy="256" rx="24" ry="16" fill="#FFB8D0" opacity="0.9"/>
+                <ellipse cx="344" cy="256" rx="24" ry="16" fill="#FFB8D0" opacity="0.9"/>
+                <!-- 微笑嘴巴 -->
+                <path d="M 226 260 Q 256 290 286 260" stroke="#2d3436" stroke-width="8" fill="none" stroke-linecap="round"/>
+                <!-- ¥ 符号 -->
+                <text x="256" y="356" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="#FFFFFF" text-anchor="middle">¥</text>
+                <!-- 装饰元素 -->
+                <rect x="80" y="100" width="40" height="12" rx="6" fill="#FFFFFF" opacity="0.6"/>
+                <circle cx="120" cy="160" r="10" fill="#FFFFFF" opacity="0.5"/>
+                <path d="M 390 80 L 410 80 M 400 70 L 400 90" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" opacity="0.7"/>
+                <path d="M 430 140 L 450 140 M 440 130 L 440 150" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
+                <circle cx="440" cy="100" r="12" fill="#FFFFFF" opacity="0.6"/>
+            </svg>
+            <span class="size-label">方案 C：珊瑚粉金币</span>
+        </div>
+    </div>
+
+    <div class="design-info">
+        <h2>🎯 设计说明</h2>
+        <p>✨ <strong>可爱风格金币图标</strong> - 圆润造型 + 萌萌表情 + ¥ 符号</p>
+        <p>😊 <strong>表情元素：</strong>圆眼睛 + 腮红 + 微笑，增加亲和力</p>
+        <p>💰 <strong>¥ 符号：</strong>直观表达记账主题</p>
+        <p>✨ <strong>装饰元素：</strong>高光、加号、圆点，增加活泼感</p>
+        <p>🎨 <strong>配色方案：</strong>薄荷绿（与APP主题一致）/ 金黄色（经典金币）/ 珊瑚粉（可爱风格）</p>
+    </div>
+</body>
+</html>

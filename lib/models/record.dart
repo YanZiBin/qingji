@@ -2,9 +2,9 @@
 enum RecordType {
   expense,
   income;
-  
+
   String toDatabaseString() => name;
-  
+
   static RecordType fromDatabaseString(String value) {
     return RecordType.values.firstWhere(
       (type) => type.name == value,
@@ -23,11 +23,11 @@ class Record {
   final DateTime dateTime;
   final DateTime createdAt;
   final DateTime updatedAt;
-  
+
   // 关联数据（非数据库字段）
   final String? categoryName;
   final String? categoryIcon;
-  
+
   Record({
     this.id,
     required this.amount,
@@ -39,11 +39,15 @@ class Record {
     DateTime? updatedAt,
     this.categoryName,
     this.categoryIcon,
-  })  : createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
-  
+  }) : createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
+
   /// 从数据库Map创建Record
-  factory Record.fromMap(Map<String, dynamic> map, {String? categoryName, String? categoryIcon}) {
+  factory Record.fromMap(
+    Map<String, dynamic> map, {
+    String? categoryName,
+    String? categoryIcon,
+  }) {
     return Record(
       id: map['id'] as int?,
       amount: (map['amount'] as num).toDouble(),
@@ -57,7 +61,7 @@ class Record {
       categoryIcon: categoryIcon,
     );
   }
-  
+
   /// 转换为数据库Map
   Map<String, dynamic> toMap() {
     return {
@@ -71,7 +75,7 @@ class Record {
       'updated_at': updatedAt.toIso8601String(),
     };
   }
-  
+
   /// 复制并修改
   Record copyWith({
     int? id,

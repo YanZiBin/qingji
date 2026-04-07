@@ -8,22 +8,20 @@ import '../../providers/category_provider.dart';
 /// 分类管理页
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
-  
+
   @override
   State<CategoriesScreen> createState() => _CategoriesScreenState();
 }
 
 class _CategoriesScreenState extends State<CategoriesScreen> {
   bool _isEditing = false;
-  
+
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: [
         // 头部
-        SliverToBoxAdapter(
-          child: _buildHeader(),
-        ),
+        SliverToBoxAdapter(child: _buildHeader()),
         // 分类网格
         SliverPadding(
           padding: const EdgeInsets.all(AppDimensions.pagePadding),
@@ -42,7 +40,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 }
                 return _buildCategoryItem(categories[index]);
               },
-              childCount: context.watch<CategoryProvider>().categories.length + 1,
+              childCount:
+                  context.watch<CategoryProvider>().categories.length + 1,
             ),
           ),
         ),
@@ -59,17 +58,14 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             child: const Text(
               '点击「编辑」可删除自定义分类\n点击「+」可添加新分类',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textTertiary,
-              ),
+              style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
             ),
           ),
         ),
       ],
     );
   }
-  
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.fromLTRB(
@@ -80,19 +76,14 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       ),
       decoration: const BoxDecoration(
         color: AppColors.bgSecondary,
-        border: Border(
-          bottom: BorderSide(color: AppColors.bgHover, width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: AppColors.bgHover, width: 1)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text(
             AppStrings.categoryManagement,
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
           ),
           TextButton(
             onPressed: () => setState(() => _isEditing = !_isEditing),
@@ -102,7 +93,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       ),
     );
   }
-  
+
   Widget _buildCategoryItem(Category category) {
     return GestureDetector(
       onLongPress: () {
@@ -121,10 +112,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  category.icon,
-                  style: const TextStyle(fontSize: 24),
-                ),
+                Text(category.icon, style: const TextStyle(fontSize: 24)),
                 const SizedBox(height: 8),
                 Text(
                   category.name,
@@ -149,11 +137,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     color: AppColors.expense,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.close,
-                    size: 14,
-                    color: Colors.white,
-                  ),
+                  child: const Icon(Icons.close, size: 14, color: Colors.white),
                 ),
               ),
             ),
@@ -161,7 +145,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       ),
     );
   }
-  
+
   Widget _buildAddCategoryButton() {
     return GestureDetector(
       onTap: _showAddCategoryDialog,
@@ -181,17 +165,14 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             SizedBox(height: 8),
             Text(
               '自定义',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
           ],
         ),
       ),
     );
   }
-  
+
   Future<void> _confirmDelete(Category category) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -210,18 +191,36 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         ],
       ),
     );
-    
+
     if (confirmed == true && mounted) {
       await context.read<CategoryProvider>().deleteCategory(category.id!);
     }
   }
-  
+
   Future<void> _showAddCategoryDialog() async {
     final nameController = TextEditingController();
+    final emojiController = TextEditingController();
     String selectedIcon = '\u{1F4DD}';
-    
-    final icons = ['\u{1F35C}', '\u{1F68C}', '\u{1F6D2}', '', '\u{1F3E0}', '\u{1F48A}', '\u{1F4DA}', '\u{1F454}', '', '\u{1F4F1}', '\u{1F3CB}\u{FE0F}', '\u{1F4B5}', '', '\u{1F4C8}'];
-    
+    bool isCustomEmoji = false;
+
+    // 只保留有实际图标的选项，删除空白
+    final icons = [
+      '\u{1F35C}', // 餐饮
+      '\u{1F68C}', // 交通
+      '\u{1F6D2}', // 购物
+      '\u{1F3E0}', // 房租
+      '\u{1F48A}', // 医疗
+      '\u{1F4DA}', // 学习
+      '\u{1F454}', // 服饰
+      '\u{1F3AE}', // 娱乐
+      '\u{1F381}', // 礼金
+      '\u{1F4F1}', // 通讯
+      '\u{1F3CB}\u{FE0F}', // 运动
+      '\u{1F4B5}', // 其他
+      '\u{1F4BC}', // 兼职
+      '\u{1F4C8}', // 理财
+    ];
+
     await showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -243,13 +242,50 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   const SizedBox(height: 16),
                   const Text('选择图标'),
                   const SizedBox(height: 8),
+                  // 自定义 Emoji 输入框
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: emojiController,
+                          decoration: const InputDecoration(
+                            hintText: '粘贴自定义 Emoji',
+                            prefixIcon: Icon(Icons.emoji_emotions),
+                            border: OutlineInputBorder(),
+                          ),
+                          maxLength: 2,
+                          onChanged: (value) {
+                            if (value.isNotEmpty) {
+                              setState(() {
+                                selectedIcon = value;
+                                isCustomEmoji = true;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    '或从下方选择：',
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 8),
+                  // 预设图标网格（已删除空白）
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: icons.map((icon) {
-                      final isSelected = selectedIcon == icon;
+                      final isSelected = selectedIcon == icon && !isCustomEmoji;
                       return GestureDetector(
-                        onTap: () => setState(() => selectedIcon = icon),
+                        onTap: () {
+                          setState(() {
+                            selectedIcon = icon;
+                            isCustomEmoji = false;
+                            emojiController.clear();
+                          });
+                        },
                         child: Container(
                           width: 48,
                           height: 48,
@@ -257,16 +293,37 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                             color: AppColors.bgTertiary,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: isSelected ? AppColors.accent : Colors.transparent,
+                              color: isSelected
+                                  ? AppColors.accent
+                                  : Colors.transparent,
                               width: 2,
                             ),
                           ),
                           child: Center(
-                            child: Text(icon, style: const TextStyle(fontSize: 22)),
+                            child: Text(
+                              icon,
+                              style: const TextStyle(fontSize: 22),
+                            ),
                           ),
                         ),
                       );
                     }).toList(),
+                  ),
+                  const SizedBox(height: 8),
+                  // 显示当前选中的图标
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.bgTertiary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('当前图标：', style: TextStyle(fontSize: 13)),
+                        Text(selectedIcon, style: const TextStyle(fontSize: 28)),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -280,14 +337,15 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 onPressed: () async {
                   final name = nameController.text.trim();
                   if (name.isEmpty) return;
-                  
+                  if (selectedIcon.isEmpty) return;
+
                   final category = Category(
                     name: name,
                     icon: selectedIcon,
                     type: RecordType.expense,
                     isDefault: false,
                   );
-                  
+
                   await context.read<CategoryProvider>().addCategory(category);
                   if (context.mounted) Navigator.pop(context);
                 },

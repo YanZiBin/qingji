@@ -23,9 +23,7 @@ class _StatsScreenState extends State<StatsScreen> {
     return CustomScrollView(
       slivers: [
         // 头部
-        SliverToBoxAdapter(
-          child: _buildHeader(),
-        ),
+        SliverToBoxAdapter(child: _buildHeader()),
         // 月度总结
         SliverToBoxAdapter(
           child: Padding(
@@ -63,19 +61,14 @@ class _StatsScreenState extends State<StatsScreen> {
       ),
       decoration: const BoxDecoration(
         color: AppColors.bgSecondary,
-        border: Border(
-          bottom: BorderSide(color: AppColors.bgHover, width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: AppColors.bgHover, width: 1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             '统计分析',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 16),
           Container(
@@ -138,10 +131,7 @@ class _StatsScreenState extends State<StatsScreen> {
             children: [
               Text(
                 '${DateFormatter.yearMonth(provider.selectedMonth)}总支出',
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Colors.white,
-                ),
+                style: const TextStyle(fontSize: 13, color: Colors.white),
               ),
               const SizedBox(height: 8),
               Text(
@@ -187,10 +177,7 @@ class _StatsScreenState extends State<StatsScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.white,
-            ),
+            style: const TextStyle(fontSize: 12, color: Colors.white),
           ),
           const SizedBox(height: 4),
           Text(
@@ -226,10 +213,7 @@ class _StatsScreenState extends State<StatsScreen> {
             children: [
               const Text(
                 '支出趋势',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 20),
               SizedBox(
@@ -288,9 +272,7 @@ class _StatsScreenState extends State<StatsScreen> {
             toY: 200 + (index * 50).toDouble(),
             gradient: AppColors.accentGradient,
             width: 20,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(6),
-            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
           ),
         ],
       );
@@ -305,9 +287,7 @@ class _StatsScreenState extends State<StatsScreen> {
         borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
         border: Border.all(color: AppColors.bgHover, width: 1),
       ),
-      child: const Center(
-        child: Text('本月暂无记录'),
-      ),
+      child: const Center(child: Text('本月暂无记录')),
     );
   }
 
@@ -323,8 +303,7 @@ class _StatsScreenState extends State<StatsScreen> {
         for (var record in provider.records) {
           if (record.type == RecordType.expense) {
             final key = '${record.categoryIcon} ${record.categoryName}';
-            categoryTotals[key] =
-                (categoryTotals[key] ?? 0) + record.amount;
+            categoryTotals[key] = (categoryTotals[key] ?? 0) + record.amount;
           }
         }
 
@@ -348,10 +327,7 @@ class _StatsScreenState extends State<StatsScreen> {
             children: [
               const Text(
                 '分类排行',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 20),
               ...sortedCategories.take(5).map((entry) {

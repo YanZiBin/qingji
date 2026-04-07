@@ -4,13 +4,9 @@ import '../core/constants.dart';
 class BottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
-  
-  const BottomNav({
-    super.key,
-    required this.currentIndex,
-    required this.onTap,
-  });
-  
+
+  const BottomNav({super.key, required this.currentIndex, required this.onTap});
+
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(

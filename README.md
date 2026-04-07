@@ -1,17 +1,46 @@
-# qingji
+# 轻记 - 简洁记账APP
 
-A new Flutter project.
+一款清新可爱、护眼暗色模式的本地记账APP，专注于快速记录日常收支。
 
-## Getting Started
+## 特性
 
-This project is a starting point for a Flutter application.
+- ⚡ 快速记账 - 3秒完成一笔记录
+- 🌙 暗色模式 - 清新薄荷绿配色，护眼舒适
+- 🔒 本地存储 - 数据完全保存在设备本地
+- 📊 统计分析 - 直观的图表和分类排行
+- 🎨 可爱UI - 高级感暗色设计，简洁有质感
+- 📦 轻量应用 - 安装包 < 20MB，启动 < 1秒
 
-A few resources to get you started if this is your first Flutter project:
+## 技术栈
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- Flutter 3.x
+- Dart 3.x
+- SQLite (sqflite)
+- Provider
+- fl_chart
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 开发
+
+```bash
+# 安装依赖
+flutter pub get
+
+# 运行
+flutter run
+
+# 构建APK
+flutter build apk --release
+```
+
+## 构建产物
+
+- `build/app/outputs/flutter-apk/app-release.apk` - 通用APK
+- `build/app/outputs/flutter-apk/app-arm64-v8a-release.apk` - ARM 64位（推荐）
+
+## 安装
+
+将APK文件传输到安卓手机，点击安装即可。
+
+## License
+
+MIT

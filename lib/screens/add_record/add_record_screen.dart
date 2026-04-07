@@ -6,11 +6,12 @@ import '../../models/category.dart';
 import '../../providers/record_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../utils/date_formatter.dart';
+import '../categories/categories_screen.dart';
 
 /// 记账页
 class AddRecordScreen extends StatefulWidget {
   const AddRecordScreen({super.key});
-  
+
   @override
   State<AddRecordScreen> createState() => _AddRecordScreenState();
 }
@@ -21,7 +22,7 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
   int? _selectedCategoryId;
   String _note = '';
   DateTime _dateTime = DateTime.now();
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,14 +56,12 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
           // 时间显示
           _buildDateTimeRow(),
           // 分类网格
-          Expanded(
-            child: _buildCategoryGrid(),
-          ),
+          Expanded(child: _buildCategoryGrid()),
         ],
       ),
     );
   }
-  
+
   Widget _buildTypeSwitcher() {
     return Container(
       margin: const EdgeInsets.all(AppDimensions.pagePadding),
@@ -73,17 +72,13 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
       padding: const EdgeInsets.all(4),
       child: Row(
         children: [
-          Expanded(
-            child: _buildTypeButton(RecordType.expense),
-          ),
-          Expanded(
-            child: _buildTypeButton(RecordType.income),
-          ),
+          Expanded(child: _buildTypeButton(RecordType.expense)),
+          Expanded(child: _buildTypeButton(RecordType.income)),
         ],
       ),
     );
   }
-  
+
   Widget _buildTypeButton(RecordType type) {
     final isSelected = _type == type;
     return GestureDetector(
@@ -94,12 +89,7 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
           color: isSelected ? AppColors.bgCard : Colors.transparent,
           borderRadius: BorderRadius.circular(AppDimensions.radiusSmall),
           boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(26),
-                    blurRadius: 8,
-                  ),
-                ]
+              ? [BoxShadow(color: Colors.black.withAlpha(26), blurRadius: 8)]
               : null,
         ),
         child: Text(
@@ -114,17 +104,14 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
       ),
     );
   }
-  
+
   Widget _buildAmountDisplay() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 28),
       child: TextField(
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         textAlign: TextAlign.center,
-        style: const TextStyle(
-          fontSize: 48,
-          fontWeight: FontWeight.w300,
-        ),
+        style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w300),
         decoration: const InputDecoration(
           border: InputBorder.none,
           hintText: '0.00',
@@ -137,53 +124,66 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
       ),
     );
   }
-  
+
   Widget _buildSelectedCategory() {
     return Consumer<CategoryProvider>(
       builder: (context, provider, _) {
         final category = provider.categories.firstWhere(
           (c) => c.id == _selectedCategoryId,
-          orElse: () => Category(
-            name: '选择分类',
-            icon: '📝',
-            type: _type,
-          ),
+          orElse: () => Category(name: '选择分类', icon: '📝', type: _type),
         );
-        
-        return Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.pagePadding,
-            vertical: AppDimensions.spacingSmall,
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
+
+        return GestureDetector(
+          onTap: () async {
+            // 跳转到分类管理页，返回后刷新分类列表
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CategoriesScreen()),
+            );
+            // 返回后重新加载分类
+            if (mounted) {
+              await provider.loadCategories();
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.pagePadding,
+              vertical: AppDimensions.spacingSmall,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.bgTertiary,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(category.icon, style: const TextStyle(fontSize: 16)),
+                      const SizedBox(width: 8),
+                      Text(category.name),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.chevron_right, size: 18, color: AppColors.textSecondary),
+                    ],
+                  ),
                 ),
-                decoration: BoxDecoration(
-                  color: AppColors.bgTertiary,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  children: [
-                    Text(category.icon, style: const TextStyle(fontSize: 16)),
-                    const SizedBox(width: 8),
-                    Text(category.name),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
     );
   }
-  
+
   Widget _buildNoteInput() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.pagePadding),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.pagePadding,
+      ),
       child: TextField(
         decoration: const InputDecoration(
           hintText: '添加备注...',
@@ -194,7 +194,7 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
       ),
     );
   }
-  
+
   Widget _buildDateTimeRow() {
     return ListTile(
       leading: const Icon(Icons.access_time, size: 20),
@@ -206,7 +206,7 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
       onTap: _selectDateTime,
     );
   }
-  
+
   Widget _buildCategoryGrid() {
     return Consumer<CategoryProvider>(
       builder: (context, provider, _) {
@@ -223,13 +223,15 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
           itemBuilder: (context, index) {
             final category = categories[index];
             final isSelected = _selectedCategoryId == category.id;
-            
+
             return GestureDetector(
               onTap: () => setState(() => _selectedCategoryId = category.id),
               child: Container(
                 decoration: BoxDecoration(
                   color: isSelected ? AppColors.accent : AppColors.bgCard,
-                  borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+                  borderRadius: BorderRadius.circular(
+                    AppDimensions.radiusMedium,
+                  ),
                   border: Border.all(
                     color: isSelected ? AppColors.accent : AppColors.bgHover,
                     width: 1,
@@ -250,7 +252,9 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
                       category.name,
                       style: TextStyle(
                         fontSize: 12,
-                        color: isSelected ? Colors.white : AppColors.textSecondary,
+                        color: isSelected
+                            ? Colors.white
+                            : AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -262,7 +266,7 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
       },
     );
   }
-  
+
   Future<void> _selectDateTime() async {
     final date = await showDatePicker(
       context: context,
@@ -290,25 +294,25 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
       }
     }
   }
-  
+
   Future<void> _saveRecord() async {
     // 验证
     if (_amount <= 0) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请输入金额')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('请输入金额')));
       return;
     }
-    
+
     if (_selectedCategoryId == null) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请选择分类')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('请选择分类')));
       return;
     }
-    
+
     // 保存
     final record = Record(
       amount: _amount,
@@ -317,18 +321,18 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
       note: _note.isEmpty ? null : _note,
       dateTime: _dateTime,
     );
-    
+
     final success = await context.read<RecordProvider>().addRecord(record);
-    
+
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('保存成功')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('保存成功')));
       Navigator.pop(context);
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('保存失败，请重试')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('保存失败，请重试')));
     }
   }
 }
