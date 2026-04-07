@@ -6,6 +6,7 @@ import '../../models/category.dart';
 import '../../providers/record_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../utils/date_formatter.dart';
+import '../categories/categories_screen.dart';
 
 /// 记账页
 class AddRecordScreen extends StatefulWidget {
@@ -212,7 +213,17 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
                   GestureDetector(
                     onTap: () {
                       Navigator.pop(context);
+                      // 切换到对应类型后跳转到分类管理页
                       provider.switchType(_type);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CategoriesScreen(),
+                        ),
+                      ).then((_) {
+                        // 返回后重新加载分类
+                        provider.loadCategories();
+                      });
                     },
                     child: const Text(
                       '管理',
@@ -268,7 +279,16 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
                         GestureDetector(
                           onTap: () {
                             Navigator.pop(context);
+                            // 切换到对应类型后跳转到分类管理页
                             provider.switchType(_type);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const CategoriesScreen(),
+                              ),
+                            ).then((_) {
+                              provider.loadCategories();
+                            });
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
