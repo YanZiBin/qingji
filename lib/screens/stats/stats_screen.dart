@@ -239,16 +239,33 @@ class _StatsScreenState extends State<StatsScreen> {
                 child: BarChart(
                   BarChartData(
                     alignment: BarChartAlignment.spaceAround,
-                    maxY: 1000,
-                    barTouchData: BarTouchData(enabled: false),
+                    maxY: _calculateMaxY(provider),
+                    barTouchData: BarTouchData(
+                      enabled: true,
+                      touchTooltipData: BarTouchTooltipData(
+                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                          final startDay = _getStartDay(provider);
+                          final day = startDay + groupIndex;
+                          return BarTooltipItem(
+                            '$day 日\n¥${rod.toY.toStringAsFixed(2)}',
+                            const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                     titlesData: FlTitlesData(
                       show: true,
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
+                            final startDay = _getStartDay(provider);
+                            final day = startDay + value.toInt();
                             return Text(
-                              '${value.toInt() + 1}',
+                              '$day',
                               style: const TextStyle(
                                 fontSize: 11,
                                 color: AppColors.textSecondary,
@@ -281,13 +298,38 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 
   List<BarChartGroupData> _generateBarGroups(RecordProvider provider) {
-    // 简化的示例，实际应该按日期分组
-    return List.generate(7, (index) {
+    // 获取当月天数
+    final daysInMonth = DateTime(
+      provider.selectedMonth.year,
+      provider.selectedMonth.month + 1,
+      0,
+    ).day;
+
+    // 按日期分组统计支出
+    final dailyTotals = <int, double>{};
+    for (var i = 1; i <= daysInMonth; i++) {
+      dailyTotals[i] = 0.0;
+    }
+
+    for (var record in provider.records) {
+      if (record.type == RecordType.expense) {
+        final day = record.dateTime.day;
+        dailyTotals[day] = (dailyTotals[day] ?? 0) + record.amount;
+      }
+    }
+
+    // 生成柱状图数据（显示最近 7 天）
+    final startDay = _getStartDay(provider);
+    final daysToShow = daysInMonth > 7 ? 7 : daysInMonth;
+    return List.generate(daysToShow, (index) {
+      final day = startDay + index;
+      final amount = dailyTotals[day] ?? 0.0;
+
       return BarChartGroupData(
         x: index,
         barRods: [
           BarChartRodData(
-            toY: 200 + (index * 50).toDouble(),
+            toY: amount,
             gradient: AppColors.accentGradient,
             width: 20,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
@@ -295,6 +337,46 @@ class _StatsScreenState extends State<StatsScreen> {
         ],
       );
     });
+  }
+
+  double _calculateMaxY(RecordProvider provider) {
+    final daysInMonth = DateTime(
+      provider.selectedMonth.year,
+      provider.selectedMonth.month + 1,
+      0,
+    ).day;
+
+    // 按日期汇总
+    final dailyTotals = <int, double>{};
+    for (var record in provider.records) {
+      if (record.type == RecordType.expense) {
+        final day = record.dateTime.day;
+        dailyTotals[day] = (dailyTotals[day] ?? 0) + record.amount;
+      }
+    }
+
+    // 只计算最近 7 天的最大值
+    final startDay = _getStartDay(provider);
+    final daysToShow = daysInMonth > 7 ? 7 : daysInMonth;
+    double maxDailyTotal = 0;
+    for (var i = 0; i < daysToShow; i++) {
+      final day = startDay + i;
+      final total = dailyTotals[day] ?? 0;
+      if (total > maxDailyTotal) {
+        maxDailyTotal = total;
+      }
+    }
+
+    return maxDailyTotal > 0 ? maxDailyTotal * 1.2 : 100.0;
+  }
+
+  int _getStartDay(RecordProvider provider) {
+    final daysInMonth = DateTime(
+      provider.selectedMonth.year,
+      provider.selectedMonth.month + 1,
+      0,
+    ).day;
+    return daysInMonth > 7 ? daysInMonth - 6 : 1;
   }
 
   Widget _buildEmptyChart() {
