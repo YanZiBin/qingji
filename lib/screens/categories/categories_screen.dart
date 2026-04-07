@@ -22,27 +22,30 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       slivers: [
         // 头部
         SliverToBoxAdapter(child: _buildHeader()),
+        // 类型切换
+        SliverToBoxAdapter(child: _buildTypeSwitcher()),
         // 分类网格
         SliverPadding(
           padding: const EdgeInsets.all(AppDimensions.pagePadding),
-          sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              mainAxisSpacing: AppDimensions.spacingMedium,
-              crossAxisSpacing: AppDimensions.spacingMedium,
-              childAspectRatio: 0.85,
-            ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final categories = context.watch<CategoryProvider>().categories;
-                if (index >= categories.length) {
-                  return _buildAddCategoryButton();
-                }
-                return _buildCategoryItem(categories[index]);
-              },
-              childCount:
-                  context.watch<CategoryProvider>().categories.length + 1,
-            ),
+          sliver: Consumer<CategoryProvider>(
+            builder: (context, provider, _) {
+              final categories = provider.categories;
+
+              return SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  mainAxisSpacing: AppDimensions.spacingMedium,
+                  crossAxisSpacing: AppDimensions.spacingMedium,
+                  childAspectRatio: 0.85,
+                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  if (index >= categories.length) {
+                    return _buildAddCategoryButton();
+                  }
+                  return _buildCategoryItem(categories[index]);
+                }, childCount: categories.length + 1),
+              );
+            },
           ),
         ),
         // 提示文本
@@ -55,10 +58,31 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               borderRadius: BorderRadius.circular(AppDimensions.radiusSmall),
               border: Border.all(color: AppColors.bgHover, width: 1),
             ),
-            child: const Text(
-              '点击「编辑」可删除自定义分类\n点击「+」可添加新分类',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
+            child: Consumer<CategoryProvider>(
+              builder: (context, provider, _) {
+                final categories = provider.categories;
+
+                return Column(
+                  children: [
+                    const Text(
+                      '点击「编辑」可删除分类\n点击「+」可添加新分类',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textTertiary,
+                      ),
+                    ),
+                    if (categories.isEmpty) ...[
+                      const SizedBox(height: 8),
+                      const Text(
+                        '💡 首次使用，点击下方「+」添加分类',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 12, color: AppColors.accent),
+                      ),
+                    ],
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -94,10 +118,57 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     );
   }
 
+  Widget _buildTypeSwitcher() {
+    return Consumer<CategoryProvider>(
+      builder: (context, provider, _) {
+        return Container(
+          margin: const EdgeInsets.all(AppDimensions.pagePadding),
+          decoration: BoxDecoration(
+            color: AppColors.bgTertiary,
+            borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+          ),
+          padding: const EdgeInsets.all(4),
+          child: Row(
+            children: [
+              Expanded(child: _buildTypeButton(RecordType.expense)),
+              Expanded(child: _buildTypeButton(RecordType.income)),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTypeButton(RecordType type) {
+    final isSelected = context.watch<CategoryProvider>().selectedType == type;
+    return GestureDetector(
+      onTap: () => context.read<CategoryProvider>().switchType(type),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.bgCard : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppDimensions.radiusSmall),
+          boxShadow: isSelected
+              ? [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8)]
+              : null,
+        ),
+        child: Text(
+          type == RecordType.expense ? '支出' : '收入',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            color: isSelected ? AppColors.accent : AppColors.textSecondary,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildCategoryItem(Category category) {
     return GestureDetector(
       onLongPress: () {
-        if (_isEditing && !category.isDefault) {
+        if (_isEditing) {
           _confirmDelete(category);
         }
       },
@@ -124,7 +195,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               ],
             ),
           ),
-          if (_isEditing && !category.isDefault)
+          if (_isEditing)
             Positioned(
               top: -6,
               right: -6,
@@ -269,7 +340,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   const SizedBox(height: 12),
                   const Text(
                     '或从下方选择：',
-                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   // 预设图标网格（已删除空白）
@@ -321,7 +395,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text('当前图标：', style: TextStyle(fontSize: 13)),
-                        Text(selectedIcon, style: const TextStyle(fontSize: 28)),
+                        Text(
+                          selectedIcon,
+                          style: const TextStyle(fontSize: 28),
+                        ),
                       ],
                     ),
                   ),
@@ -336,18 +413,58 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               TextButton(
                 onPressed: () async {
                   final name = nameController.text.trim();
-                  if (name.isEmpty) return;
-                  if (selectedIcon.isEmpty) return;
+                  if (name.isEmpty) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text('请输入分类名称')));
+                    return;
+                  }
+                  if (selectedIcon.isEmpty) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text('请选择图标')));
+                    return;
+                  }
+
+                  // 检查是否与现有分类重复
+                  final provider = context.read<CategoryProvider>();
+                  final existingCategory = provider.categories.firstWhere(
+                    (c) => c.name == name,
+                    orElse: () => Category(
+                      name: '',
+                      icon: '',
+                      type: provider.selectedType,
+                    ),
+                  );
+
+                  if (existingCategory.name.isNotEmpty) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('分类「$name」已存在，请使用其他名称')),
+                    );
+                    return;
+                  }
 
                   final category = Category(
                     name: name,
                     icon: selectedIcon,
-                    type: RecordType.expense,
-                    isDefault: false,
+                    type: provider.selectedType,
                   );
 
-                  await context.read<CategoryProvider>().addCategory(category);
-                  if (context.mounted) Navigator.pop(context);
+                  final success = await provider.addCategory(category);
+                  if (!context.mounted) return;
+
+                  if (success) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text('添加成功')));
+                  } else {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text('添加失败，请重试')));
+                  }
                 },
                 child: const Text('保存'),
               ),

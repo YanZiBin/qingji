@@ -36,9 +36,12 @@ class CategoryProvider extends ChangeNotifier {
   /// 添加分类
   Future<bool> addCategory(Category category) async {
     try {
-      await _dbHelper.insertCategory(category);
-      await loadCategories();
-      return true;
+      final result = await _dbHelper.insertCategory(category);
+      if (result > 0) {
+        await loadCategories();
+        return true;
+      }
+      return false;
     } catch (e) {
       debugPrint('添加分类失败: $e');
       return false;

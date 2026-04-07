@@ -61,54 +61,7 @@ class DatabaseHelper {
       'CREATE INDEX idx_records_category ON records(category_id)',
     );
 
-    // 插入默认分类
-    await _insertDefaultCategories(db);
-  }
-
-  Future<void> _insertDefaultCategories(Database db) async {
-    // 支出分类
-    final expenseCategories = [
-      {'name': '餐饮', 'icon': '🍜', 'sortOrder': 1},
-      {'name': '交通', 'icon': '🚌', 'sortOrder': 2},
-      {'name': '购物', 'icon': '🛒', 'sortOrder': 3},
-      {'name': '娱乐', 'icon': '🎮', 'sortOrder': 4},
-      {'name': '房租', 'icon': '🏠', 'sortOrder': 5},
-      {'name': '医疗', 'icon': '💊', 'sortOrder': 6},
-      {'name': '学习', 'icon': '📚', 'sortOrder': 7},
-      {'name': '服饰', 'icon': '👔', 'sortOrder': 8},
-      {'name': '礼金', 'icon': '🎁', 'sortOrder': 9},
-      {'name': '通讯', 'icon': '📱', 'sortOrder': 10},
-      {'name': '运动', 'icon': '🏋️', 'sortOrder': 11},
-    ];
-
-    for (var cat in expenseCategories) {
-      await db.insert('categories', {
-        'name': cat['name'],
-        'icon': cat['icon'],
-        'type': RecordType.expense.toDatabaseString(),
-        'is_default': 1,
-        'sort_order': cat['sortOrder'],
-      });
-    }
-
-    // 收入分类
-    final incomeCategories = [
-      {'name': '工资', 'icon': '💰', 'sortOrder': 1},
-      {'name': '兼职', 'icon': '💼', 'sortOrder': 2},
-      {'name': '理财', 'icon': '📈', 'sortOrder': 3},
-      {'name': '礼金', 'icon': '🎁', 'sortOrder': 4},
-      {'name': '其他', 'icon': '💵', 'sortOrder': 5},
-    ];
-
-    for (var cat in incomeCategories) {
-      await db.insert('categories', {
-        'name': cat['name'],
-        'icon': cat['icon'],
-        'type': RecordType.income.toDatabaseString(),
-        'is_default': 1,
-        'sort_order': cat['sortOrder'],
-      });
-    }
+    // 不再插入预设分类，所有分类由用户自定义
   }
 
   // ========== Category CRUD ==========
@@ -132,11 +85,7 @@ class DatabaseHelper {
 
   Future<int> deleteCategory(int id) async {
     final db = await database;
-    return await db.delete(
-      'categories',
-      where: 'id = ? AND is_default = 0',
-      whereArgs: [id],
-    );
+    return await db.delete('categories', where: 'id = ?', whereArgs: [id]);
   }
 
   // ========== Record CRUD ==========
