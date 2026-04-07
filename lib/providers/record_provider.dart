@@ -50,7 +50,19 @@ class RecordProvider extends ChangeNotifier {
       await loadMonthRecords(_selectedMonth);
       return true;
     } catch (e) {
-      debugPrint('添加记录失败: $e');
+      debugPrint('添加记录失败：$e');
+      return false;
+    }
+  }
+
+  /// 更新记录
+  Future<bool> updateRecord(Record record) async {
+    try {
+      await _dbHelper.updateRecord(record);
+      await loadMonthRecords(_selectedMonth);
+      return true;
+    } catch (e) {
+      debugPrint('更新记录失败：$e');
       return false;
     }
   }

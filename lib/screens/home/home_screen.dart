@@ -7,6 +7,7 @@ import '../../utils/date_formatter.dart';
 import '../../utils/currency_formatter.dart';
 import '../../widgets/bottom_nav.dart';
 import '../add_record/add_record_screen.dart';
+import '../edit_record/edit_record_screen.dart';
 import '../stats/stats_screen.dart';
 import '../categories/categories_screen.dart';
 import '../../models/record.dart';
@@ -246,9 +247,14 @@ class _HomeContent extends StatelessWidget {
 }
 
 /// 记录列表
-class _RecordList extends StatelessWidget {
+class _RecordList extends StatefulWidget {
   const _RecordList();
 
+  @override
+  State<_RecordList> createState() => _RecordListState();
+}
+
+class _RecordListState extends State<_RecordList> {
   @override
   Widget build(BuildContext context) {
     return Consumer<RecordProvider>(
@@ -331,6 +337,7 @@ class _RecordList extends StatelessWidget {
 
   Widget _buildRecordItem(Record record) {
     return ListTile(
+      onLongPress: () => _showRecordOptions(record),
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppDimensions.pagePadding,
         vertical: 4,
@@ -373,6 +380,118 @@ class _RecordList extends StatelessWidget {
               ? AppColors.expense
               : AppColors.income,
         ),
+      ),
+    );
+  }
+
+  void _showRecordOptions(Record record) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.bgSecondary,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.bgHover,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              leading: const Icon(Icons.edit, color: AppColors.accent),
+              title: const Text(
+                '编辑',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.textPrimary,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _navigateToEditRecord(context, record);
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.delete_outline,
+                color: AppColors.expense,
+              ),
+              title: const Text(
+                '删除',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.textPrimary,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _confirmDelete(context, record);
+              },
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _navigateToEditRecord(BuildContext context, Record record) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => EditRecordScreen(record: record)),
+    ).then((success) {
+      if (success == true) {
+        context.read<RecordProvider>().loadMonthRecords(
+          context.read<RecordProvider>().selectedMonth,
+        );
+      }
+    });
+  }
+
+  void _confirmDelete(BuildContext context, Record record) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('删除记录'),
+        content: Text(
+          '确定要删除这条记录吗？\n\n${record.categoryName} ${CurrencyFormatter.format(record.amount)}',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final success = await context.read<RecordProvider>().deleteRecord(
+                record.id!,
+              );
+              if (context.mounted) {
+                Navigator.pop(context);
+                if (success) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('删除成功')));
+                } else {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('删除失败，请重试')));
+                }
+              }
+            },
+            child: const Text('删除', style: TextStyle(color: AppColors.expense)),
+          ),
+        ],
       ),
     );
   }
