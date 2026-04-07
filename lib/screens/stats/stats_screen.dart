@@ -128,31 +128,12 @@ class _StatsScreenState extends State<StatsScreen> {
   Widget _buildSummaryCard() {
     return Consumer<RecordProvider>(
       builder: (context, provider, _) {
-        final summary = provider.monthSummary;
-        final expense = summary['expense'] ?? 0.0;
-
-        // 计算当月实际天数
-        final now = DateTime.now();
-        final selectedMonth = provider.selectedMonth;
-        final isCurrentMonth =
-            selectedMonth.year == now.year && selectedMonth.month == now.month;
-
-        // 如果是当月，使用今天的天数；否则使用当月总天数
-        final daysInMonth = DateTime(
-          selectedMonth.year,
-          selectedMonth.month + 1,
-          0,
-        ).day;
-        final daysToCount = isCurrentMonth ? now.day : daysInMonth;
-
-        // 计算实际记账天数（去重）
-        final uniqueDays = provider.records
-            .map(
-              (r) =>
-                  DateTime(r.dateTime.year, r.dateTime.month, r.dateTime.day),
-            )
-            .toSet()
-            .length;
+        // 根据时间维度计算数据
+        final timeRangeData = _getTimeRangeData(provider);
+        final expense = timeRangeData['expense'] ?? 0.0;
+        final periodLabel = timeRangeData['label'] as String;
+        final periodCount = timeRangeData['count'] as int;
+        final uniquePeriods = timeRangeData['uniquePeriods'] as int;
 
         return Container(
           padding: const EdgeInsets.all(AppDimensions.cardPadding),
@@ -163,7 +144,7 @@ class _StatsScreenState extends State<StatsScreen> {
           child: Column(
             children: [
               Text(
-                '${DateFormatter.yearMonth(provider.selectedMonth)}总支出',
+                periodLabel,
                 style: const TextStyle(fontSize: 13, color: Colors.white),
               ),
               const SizedBox(height: 8),
@@ -180,11 +161,18 @@ class _StatsScreenState extends State<StatsScreen> {
                 children: [
                   Expanded(
                     child: _buildSummaryItem(
-                      '日均支出',
-                      CurrencyFormatter.format(expense / daysToCount),
+                      _getAverageLabel(),
+                      CurrencyFormatter.format(
+                        _getAverageValue(expense, periodCount),
+                      ),
                     ),
                   ),
-                  Expanded(child: _buildSummaryItem('记账天数', '$uniqueDays 天')),
+                  Expanded(
+                    child: _buildSummaryItem(
+                      _getRecordPeriodsLabel(),
+                      '$uniquePeriods ${_getRecordPeriodsUnit()}',
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -192,6 +180,110 @@ class _StatsScreenState extends State<StatsScreen> {
         );
       },
     );
+  }
+
+  Map<String, dynamic> _getTimeRangeData(RecordProvider provider) {
+    final now = DateTime.now();
+    final records = provider.records;
+
+    if (_timeIndex == 0) {
+      // 周：计算本周数据
+      final weekStart = now.subtract(Duration(days: now.weekday - 1));
+      final weekStartDateTime = DateTime(
+        weekStart.year,
+        weekStart.month,
+        weekStart.day,
+      );
+      final weekRecords = records
+          .where((r) => r.dateTime.isAfter(weekStartDateTime))
+          .toList();
+      final expense = weekRecords.fold<double>(
+        0,
+        (sum, r) => r.type == RecordType.expense ? sum + r.amount : sum,
+      );
+      final uniqueDays = weekRecords
+          .map(
+            (r) => DateTime(r.dateTime.year, r.dateTime.month, r.dateTime.day),
+          )
+          .toSet()
+          .length;
+
+      return {
+        'expense': expense,
+        'label': '本周总支出',
+        'count': 7,
+        'uniquePeriods': uniqueDays,
+      };
+    } else if (_timeIndex == 1) {
+      // 月：计算本月数据
+      final summary = provider.monthSummary;
+      final expense = summary['expense'] ?? 0.0;
+      final selectedMonth = provider.selectedMonth;
+      final isCurrentMonth =
+          selectedMonth.year == now.year && selectedMonth.month == now.month;
+      final daysInMonth = DateTime(
+        selectedMonth.year,
+        selectedMonth.month + 1,
+        0,
+      ).day;
+      final daysToCount = isCurrentMonth ? now.day : daysInMonth;
+      final uniqueDays = records
+          .map(
+            (r) => DateTime(r.dateTime.year, r.dateTime.month, r.dateTime.day),
+          )
+          .toSet()
+          .length;
+
+      return {
+        'expense': expense,
+        'label': '${DateFormatter.yearMonth(selectedMonth)}总支出',
+        'count': daysToCount,
+        'uniquePeriods': uniqueDays,
+      };
+    } else {
+      // 年：计算本年数据
+      final yearStart = DateTime(now.year, 1, 1);
+      final yearRecords = records
+          .where((r) => r.dateTime.isAfter(yearStart))
+          .toList();
+      final expense = yearRecords.fold<double>(
+        0,
+        (sum, r) => r.type == RecordType.expense ? sum + r.amount : sum,
+      );
+      final uniqueMonths = yearRecords
+          .map((r) => DateTime(r.dateTime.year, r.dateTime.month))
+          .toSet()
+          .length;
+
+      return {
+        'expense': expense,
+        'label': '${now.year}年总支出',
+        'count': now.month,
+        'uniquePeriods': uniqueMonths,
+      };
+    }
+  }
+
+  String _getAverageLabel() {
+    if (_timeIndex == 0) return '日均支出';
+    if (_timeIndex == 1) return '日均支出';
+    return '月均支出';
+  }
+
+  double _getAverageValue(double expense, int periodCount) {
+    return periodCount > 0 ? expense / periodCount : 0;
+  }
+
+  String _getRecordPeriodsLabel() {
+    if (_timeIndex == 0) return '记账天数';
+    if (_timeIndex == 1) return '记账天数';
+    return '记账月数';
+  }
+
+  String _getRecordPeriodsUnit() {
+    if (_timeIndex == 0) return '天';
+    if (_timeIndex == 1) return '天';
+    return '月';
   }
 
   Widget _buildSummaryItem(String label, String value) {
@@ -224,7 +316,9 @@ class _StatsScreenState extends State<StatsScreen> {
   Widget _buildTrendChart() {
     return Consumer<RecordProvider>(
       builder: (context, provider, _) {
-        if (provider.records.isEmpty) {
+        final chartData = _getChartData(provider);
+        if (chartData['spots'] == null ||
+            (chartData['spots'] as List).isEmpty) {
           return _buildEmptyChart();
         }
 
@@ -251,7 +345,7 @@ class _StatsScreenState extends State<StatsScreen> {
                     gridData: FlGridData(
                       show: true,
                       drawVerticalLine: false,
-                      horizontalInterval: _calculateMaxY(provider) / 4,
+                      horizontalInterval: (chartData['maxY'] as double) / 4,
                       getDrawingHorizontalLine: (value) {
                         return FlLine(color: AppColors.bgHover, strokeWidth: 1);
                       },
@@ -261,11 +355,11 @@ class _StatsScreenState extends State<StatsScreen> {
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
-                          interval: _getLabelInterval(provider),
+                          interval: chartData['labelInterval'] as double,
                           getTitlesWidget: (value, meta) {
-                            final day = value.toInt() + 1;
+                            final label = _getXAxisLabel(value.toInt());
                             return Text(
-                              '$day',
+                              label,
                               style: const TextStyle(
                                 fontSize: 10,
                                 color: AppColors.textSecondary,
@@ -286,18 +380,38 @@ class _StatsScreenState extends State<StatsScreen> {
                     ),
                     borderData: FlBorderData(show: false),
                     minX: 0,
-                    maxX: _getMaxX(provider).toDouble(),
+                    maxX: chartData['maxX'] as double,
                     minY: 0,
-                    maxY: _calculateMaxY(provider),
-                    lineBarsData: _generateLineBars(provider),
+                    maxY: chartData['maxY'] as double,
+                    lineBarsData: [
+                      LineChartBarData(
+                        spots: chartData['spots'] as List<FlSpot>,
+                        isCurved: true,
+                        color: AppColors.accent,
+                        barWidth: 3,
+                        isStrokeCapRound: true,
+                        dotData: FlDotData(show: false),
+                        belowBarData: BarAreaData(
+                          show: true,
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              AppColors.accent.withOpacity(0.3),
+                              AppColors.accent.withOpacity(0.05),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                     lineTouchData: LineTouchData(
                       enabled: true,
                       touchTooltipData: LineTouchTooltipData(
                         getTooltipItems: (touchedSpots) {
                           return touchedSpots.map((spot) {
-                            final day = spot.x.toInt() + 1;
+                            final label = _getTooltipLabel(spot.x.toInt());
                             return LineTooltipItem(
-                              '$day 日\n¥${spot.y.toStringAsFixed(2)}',
+                              '$label\n¥${spot.y.toStringAsFixed(2)}',
                               const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -317,113 +431,126 @@ class _StatsScreenState extends State<StatsScreen> {
     );
   }
 
-  double _calculateMaxY(RecordProvider provider) {
-    final daysInMonth = DateTime(
-      provider.selectedMonth.year,
-      provider.selectedMonth.month + 1,
-      0,
-    ).day;
+  Map<String, dynamic> _getChartData(RecordProvider provider) {
+    final now = DateTime.now();
+    final records = provider.records;
+    List<FlSpot> spots = [];
+    double maxY = 100;
+    double maxX = 0;
+    double labelInterval = 1;
 
-    // 按日期汇总
-    final dailyTotals = <int, double>{};
-    for (var record in provider.records) {
-      if (record.type == RecordType.expense) {
-        final day = record.dateTime.day;
-        dailyTotals[day] = (dailyTotals[day] ?? 0) + record.amount;
+    if (_timeIndex == 0) {
+      // 周：显示本周 7 天的数据
+      final weekStart = now.subtract(Duration(days: now.weekday - 1));
+      final weekStartDateTime = DateTime(
+        weekStart.year,
+        weekStart.month,
+        weekStart.day,
+      );
+
+      final dailyTotals = <int, double>{};
+      for (var i = 0; i < 7; i++) {
+        dailyTotals[i] = 0.0;
       }
-    }
 
-    // 只计算最近 7 天的最大值
-    final startDay = _getStartDay(provider);
-    final daysToShow = daysInMonth > 7 ? 7 : daysInMonth;
-    double maxDailyTotal = 0;
-    for (var i = 0; i < daysToShow; i++) {
-      final day = startDay + i;
-      final total = dailyTotals[day] ?? 0;
-      if (total > maxDailyTotal) {
-        maxDailyTotal = total;
+      for (var record in records) {
+        if (record.dateTime.isAfter(weekStartDateTime) &&
+            record.type == RecordType.expense) {
+          final dayIndex = record.dateTime.difference(weekStartDateTime).inDays;
+          dailyTotals[dayIndex] = (dailyTotals[dayIndex] ?? 0) + record.amount;
+        }
       }
-    }
 
-    return maxDailyTotal > 0 ? maxDailyTotal * 1.2 : 100.0;
-  }
+      spots = List.generate(
+        7,
+        (i) => FlSpot(i.toDouble(), dailyTotals[i] ?? 0.0),
+      );
+      maxY = dailyTotals.values.reduce((a, b) => a > b ? a : b);
+      maxX = 6;
+      labelInterval = 1;
+    } else if (_timeIndex == 1) {
+      // 月：显示当月每天的数据
+      final daysInMonth = DateTime(
+        provider.selectedMonth.year,
+        provider.selectedMonth.month + 1,
+        0,
+      ).day;
 
-  int _getStartDay(RecordProvider provider) {
-    final daysInMonth = DateTime(
-      provider.selectedMonth.year,
-      provider.selectedMonth.month + 1,
-      0,
-    ).day;
-    return daysInMonth > 7 ? daysInMonth - 6 : 1;
-  }
-
-  int _getMaxX(RecordProvider provider) {
-    final daysInMonth = DateTime(
-      provider.selectedMonth.year,
-      provider.selectedMonth.month + 1,
-      0,
-    ).day;
-    return daysInMonth - 1;
-  }
-
-  double _getLabelInterval(RecordProvider provider) {
-    final daysInMonth = DateTime(
-      provider.selectedMonth.year,
-      provider.selectedMonth.month + 1,
-      0,
-    ).day;
-    if (daysInMonth <= 10) return 2;
-    if (daysInMonth <= 20) return 5;
-    return 10;
-  }
-
-  List<LineChartBarData> _generateLineBars(RecordProvider provider) {
-    final daysInMonth = DateTime(
-      provider.selectedMonth.year,
-      provider.selectedMonth.month + 1,
-      0,
-    ).day;
-
-    // 按日期分组统计支出
-    final dailyTotals = <int, double>{};
-    for (var i = 1; i <= daysInMonth; i++) {
-      dailyTotals[i] = 0.0;
-    }
-
-    for (var record in provider.records) {
-      if (record.type == RecordType.expense) {
-        final day = record.dateTime.day;
-        dailyTotals[day] = (dailyTotals[day] ?? 0) + record.amount;
+      final dailyTotals = <int, double>{};
+      for (var i = 1; i <= daysInMonth; i++) {
+        dailyTotals[i] = 0.0;
       }
+
+      for (var record in records) {
+        if (record.type == RecordType.expense) {
+          dailyTotals[record.dateTime.day] =
+              (dailyTotals[record.dateTime.day] ?? 0) + record.amount;
+        }
+      }
+
+      spots = List.generate(
+        daysInMonth,
+        (i) => FlSpot(i.toDouble(), dailyTotals[i + 1] ?? 0.0),
+      );
+      maxX = daysInMonth - 1;
+      labelInterval = daysInMonth <= 10 ? 2 : (daysInMonth <= 20 ? 5 : 10);
+    } else {
+      // 年：显示 12 个月的数据
+      final monthlyTotals = <int, double>{};
+      for (var i = 1; i <= 12; i++) {
+        monthlyTotals[i] = 0.0;
+      }
+
+      final yearStart = DateTime(now.year, 1, 1);
+      for (var record in records) {
+        if (record.dateTime.isAfter(yearStart) &&
+            record.type == RecordType.expense) {
+          final month = record.dateTime.month;
+          monthlyTotals[month] = (monthlyTotals[month] ?? 0) + record.amount;
+        }
+      }
+
+      spots = List.generate(
+        12,
+        (i) => FlSpot(i.toDouble(), monthlyTotals[i + 1] ?? 0.0),
+      );
+      maxX = 11;
+      labelInterval = 2;
     }
 
-    // 生成折线图数据点
-    final spots = <FlSpot>[];
-    for (var day = 1; day <= daysInMonth; day++) {
-      spots.add(FlSpot((day - 1).toDouble(), dailyTotals[day] ?? 0.0));
-    }
+    maxY = maxY > 0 ? maxY * 1.2 : 100;
 
-    return [
-      LineChartBarData(
-        spots: spots,
-        isCurved: true,
-        color: AppColors.accent,
-        barWidth: 3,
-        isStrokeCapRound: true,
-        dotData: FlDotData(show: false),
-        belowBarData: BarAreaData(
-          show: true,
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.accent.withOpacity(0.3),
-              AppColors.accent.withOpacity(0.05),
-            ],
-          ),
-        ),
-      ),
-    ];
+    return {
+      'spots': spots,
+      'maxY': maxY,
+      'maxX': maxX,
+      'labelInterval': labelInterval,
+    };
+  }
+
+  String _getXAxisLabel(int value) {
+    if (_timeIndex == 0) {
+      // 周：显示周一到周日
+      const weekdays = ['一', '二', '三', '四', '五', '六', '日'];
+      return '周${weekdays[value]}';
+    } else if (_timeIndex == 1) {
+      // 月：显示日期
+      return '$value';
+    } else {
+      // 年：显示月份
+      return '${value + 1}月';
+    }
+  }
+
+  String _getTooltipLabel(int value) {
+    if (_timeIndex == 0) {
+      const weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+      return weekdays[value];
+    } else if (_timeIndex == 1) {
+      return '${value + 1}日';
+    } else {
+      return '${value + 1}月';
+    }
   }
 
   Widget _buildEmptyChart() {
