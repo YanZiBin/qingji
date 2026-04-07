@@ -15,6 +15,7 @@ class CategoriesScreen extends StatefulWidget {
 
 class _CategoriesScreenState extends State<CategoriesScreen> {
   bool _isEditing = false;
+  RecordType _selectedType = RecordType.expense;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,11 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           padding: const EdgeInsets.all(AppDimensions.pagePadding),
           sliver: Consumer<CategoryProvider>(
             builder: (context, provider, _) {
-              final categories = provider.categories;
+              final allCategories = provider.categories;
+              // 根据类型过滤
+              final categories = allCategories
+                  .where((c) => c.type == _selectedType)
+                  .toList();
 
               return SliverGrid(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -60,7 +65,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             ),
             child: Consumer<CategoryProvider>(
               builder: (context, provider, _) {
-                final categories = provider.categories;
+                final allCategories = provider.categories;
+                final categories = allCategories
+                    .where((c) => c.type == _selectedType)
+                    .toList();
 
                 return Column(
                   children: [
@@ -75,7 +83,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     if (categories.isEmpty) ...[
                       const SizedBox(height: 8),
                       const Text(
-                        '💡 首次使用，点击下方「+」添加分类',
+                        '💡 暂无分类，点击下方「+」添加',
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 12, color: AppColors.accent),
                       ),
@@ -130,48 +138,72 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   }
 
   Widget _buildTypeSwitcher() {
-    return Consumer<CategoryProvider>(
-      builder: (context, provider, _) {
-        return Container(
-          margin: const EdgeInsets.all(AppDimensions.pagePadding),
-          decoration: BoxDecoration(
-            color: AppColors.bgTertiary,
-            borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+    return Container(
+      margin: const EdgeInsets.all(AppDimensions.pagePadding),
+      decoration: BoxDecoration(
+        color: AppColors.bgTertiary,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedType = RecordType.expense),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: _selectedType == RecordType.expense
+                      ? AppColors.bgCard
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(
+                    AppDimensions.radiusSmall,
+                  ),
+                ),
+                child: Text(
+                  '支出',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: _selectedType == RecordType.expense
+                        ? AppColors.accent
+                        : AppColors.textSecondary,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+              ),
+            ),
           ),
-          padding: const EdgeInsets.all(4),
-          child: Row(
-            children: [
-              Expanded(child: _buildTypeButton(RecordType.expense)),
-              Expanded(child: _buildTypeButton(RecordType.income)),
-            ],
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedType = RecordType.income),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: _selectedType == RecordType.income
+                      ? AppColors.bgCard
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(
+                    AppDimensions.radiusSmall,
+                  ),
+                ),
+                child: Text(
+                  '收入',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: _selectedType == RecordType.income
+                        ? AppColors.accent
+                        : AppColors.textSecondary,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+              ),
+            ),
           ),
-        );
-      },
-    );
-  }
-
-  Widget _buildTypeButton(RecordType type) {
-    final isSelected = context.watch<CategoryProvider>().selectedType == type;
-    return GestureDetector(
-      onTap: () => context.read<CategoryProvider>().switchType(type),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.bgCard : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusSmall),
-          boxShadow: isSelected
-              ? [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8)]
-              : null,
-        ),
-        child: Text(
-          type == RecordType.expense ? '支出' : '收入',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-            color: isSelected ? AppColors.accent : AppColors.textSecondary,
-          ),
-        ),
+        ],
       ),
     );
   }
@@ -262,13 +294,34 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         title: const Text('删除分类'),
         content: Text('确定要删除「${category.name}」吗？'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+          GestureDetector(
+            onTap: () => Navigator.pop(context, false),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: const Text(
+                '取消',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: AppColors.textSecondary,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+            ),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('删除'),
+          GestureDetector(
+            onTap: () => Navigator.pop(context, true),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: const Text(
+                '删除',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.expense,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -417,12 +470,25 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               ),
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  child: const Text(
+                    '取消',
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: AppColors.textSecondary,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                ),
               ),
-              TextButton(
-                onPressed: () async {
+              GestureDetector(
+                onTap: () async {
                   final name = nameController.text.trim();
                   if (name.isEmpty) {
                     ScaffoldMessenger.of(
@@ -441,11 +507,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   final provider = context.read<CategoryProvider>();
                   final existingCategory = provider.categories.firstWhere(
                     (c) => c.name == name,
-                    orElse: () => Category(
-                      name: '',
-                      icon: '',
-                      type: provider.selectedType,
-                    ),
+                    orElse: () =>
+                        Category(name: '', icon: '', type: _selectedType),
                   );
 
                   if (existingCategory.name.isNotEmpty) {
@@ -459,7 +522,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   final category = Category(
                     name: name,
                     icon: selectedIcon,
-                    type: provider.selectedType,
+                    type: _selectedType,
                   );
 
                   final success = await provider.addCategory(category);
@@ -477,7 +540,21 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     ).showSnackBar(const SnackBar(content: Text('添加失败，请重试')));
                   }
                 },
-                child: const Text('保存'),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  child: const Text(
+                    '保存',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.accent,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                ),
               ),
             ],
           );
