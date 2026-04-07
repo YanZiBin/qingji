@@ -29,7 +29,10 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
       appBar: AppBar(
         leading: TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text(AppStrings.cancel),
+          child: const Text(
+            AppStrings.cancel,
+            style: TextStyle(decoration: TextDecoration.none),
+          ),
         ),
         title: const Text(AppStrings.addRecord),
         centerTitle: true,
@@ -38,7 +41,10 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
             onPressed: _saveRecord,
             child: const Text(
               AppStrings.save,
-              style: TextStyle(fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                decoration: TextDecoration.none,
+              ),
             ),
           ),
         ],

@@ -73,6 +73,7 @@ class AppTheme {
       style: TextButton.styleFrom(
         foregroundColor: AppColors.accent,
         overlayColor: Colors.transparent,
+        textStyle: const TextStyle(decoration: TextDecoration.none),
       ),
     ),
     iconTheme: const IconThemeData(

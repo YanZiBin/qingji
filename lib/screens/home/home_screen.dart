@@ -90,7 +90,13 @@ class _HomeContent extends StatelessWidget {
                   '最近记录',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
-                TextButton(onPressed: () {}, child: const Text('查看全部')),
+                TextButton(
+                  onPressed: () {},
+                  child: const Text(
+                    '查看全部',
+                    style: TextStyle(decoration: TextDecoration.none),
+                  ),
+                ),
               ],
             ),
           ),
