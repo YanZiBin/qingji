@@ -8,7 +8,6 @@ import '../../utils/currency_formatter.dart';
 import '../../widgets/bottom_nav.dart';
 import '../add_record/add_record_screen.dart';
 import '../stats/stats_screen.dart';
-import '../categories/categories_screen.dart';
 import '../../models/record.dart';
 
 /// 首页
@@ -22,11 +21,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = const [
-    _HomeContent(),
-    StatsScreen(),
-    CategoriesScreen(),
-  ];
+  final List<Widget> _screens = const [_HomeContent(), StatsScreen()];
 
   @override
   void initState() {

@@ -7,7 +7,9 @@ import '../../providers/category_provider.dart';
 
 /// 分类管理页
 class CategoriesScreen extends StatefulWidget {
-  const CategoriesScreen({super.key});
+  final bool showBackButton;
+
+  const CategoriesScreen({super.key, this.showBackButton = false});
 
   @override
   State<CategoriesScreen> createState() => _CategoriesScreenState();
@@ -100,9 +102,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(
+      padding: EdgeInsets.fromLTRB(
         AppDimensions.pagePadding,
-        40,
+        widget.showBackButton ? 16 : 40,
         AppDimensions.pagePadding,
         AppDimensions.cardPadding,
       ),
@@ -113,21 +115,24 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            AppStrings.categoryManagement,
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
-          ),
-          TextButton(
-            onPressed: () => setState(() => _isEditing = !_isEditing),
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.accent,
-              overlayColor: Colors.transparent,
+          if (widget.showBackButton)
+            GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: const Icon(Icons.close, size: 24),
+            )
+          else
+            const Text(
+              AppStrings.categoryManagement,
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
             ),
+          GestureDetector(
+            onTap: () => setState(() => _isEditing = !_isEditing),
             child: Text(
               _isEditing ? AppStrings.done : AppStrings.edit,
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
+                color: AppColors.accent,
                 decoration: TextDecoration.none,
               ),
             ),
