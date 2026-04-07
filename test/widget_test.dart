@@ -1,30 +1,82 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// This is a basic Flutter widget test for the Qingji accounting app.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 
 import 'package:qingji/main.dart';
+import 'package:qingji/providers/record_provider.dart';
+import 'package:qingji/providers/category_provider.dart';
+import 'package:qingji/core/constants.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('应用启动并显示首页', (WidgetTester tester) async {
+    // 构建应用（使用 Provider 包裹）
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => RecordProvider()),
+          ChangeNotifierProvider(create: (_) => CategoryProvider()),
+        ],
+        child: const MyApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // 验证首页标题
+    expect(find.text('轻记'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // 验证底部导航栏存在
+    expect(find.byType(BottomNavigationBar), findsOneWidget);
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('记账页面可以打开', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => RecordProvider()),
+          ChangeNotifierProvider(create: (_) => CategoryProvider()),
+        ],
+        child: const MyApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // 点击 FAB 打开记账页
+    final fabFinder = find.byType(FloatingActionButton);
+    expect(fabFinder, findsOneWidget);
+    await tester.tap(fabFinder);
+    await tester.pumpAndSettle();
+
+    // 验证记账页标题
+    expect(find.text('记一笔'), findsOneWidget);
+
+    // 验证金额输入框存在
+    expect(find.text('0.00'), findsOneWidget);
+  });
+
+  testWidgets('底部导航栏切换页面', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => RecordProvider()),
+          ChangeNotifierProvider(create: (_) => CategoryProvider()),
+        ],
+        child: const MyApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // 验证首页元素
+    expect(find.text('轻记'), findsOneWidget);
+
+    // 点击统计标签
+    final statsTab = find.text(AppStrings.stats);
+    expect(statsTab, findsOneWidget);
+    await tester.tap(statsTab);
+    await tester.pumpAndSettle();
+
+    // 验证统计页标题
+    expect(find.text('统计分析'), findsOneWidget);
   });
 }
